@@ -3,13 +3,14 @@ import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
 import { AttendanceRecord, Punch } from "./attendance-record.schema";
 import { HydratedDocument } from "mongoose";
 import { CorrectionRequestStatus } from "./enums/index";
+import { EmployeeProfile } from "../../employee-profile/models/employee-profile.schema";
 
 export type AttendanceCorrectionRequestDocument = HydratedDocument<AttendanceCorrectionRequest>;
 
 @Schema()
 export class AttendanceCorrectionRequest{
-    @Prop({required: true})
-    employeeId: string; // reference employee id in the integration part
+    @Prop({type: Types.ObjectId, ref: 'EmployeeProfile', required: true})
+    employeeId: Types.ObjectId;
 
     @Prop({type: Types.ObjectId, ref: 'AttendanceRecord', required: true})
     attendanceRecord: AttendanceRecord;

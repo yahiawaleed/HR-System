@@ -2,6 +2,7 @@ import { Schema, SchemaFactory, Prop } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 import { HydratedDocument } from "mongoose";
 import { PunchType } from "./enums/index";
+import { EmployeeProfile } from "../../employee-profile/models/employee-profile.schema";
 
 export type Punch = {
     type: PunchType;
@@ -12,8 +13,8 @@ export type AttendanceRecordDocument = HydratedDocument<AttendanceRecord>;
 
 @Schema()
 export class AttendanceRecord{
-    @Prop({required: true})
-    employeeId: string; // refrence employee id in the integration part
+    @Prop({type: Types.ObjectId, ref: 'EmployeeProfile', required: true})
+    employeeId: Types.ObjectId;
 
     @Prop({default: []})
     punches: Punch[];

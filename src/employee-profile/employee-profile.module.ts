@@ -4,6 +4,6 @@ import { EmployeeProfileService } from './employee-profile.service';
 
 @Module({
   controllers: [EmployeeProfileController],
-  providers: [EmployeeProfileService]
+  providers: [EmployeeProfileService],
 })
 export class EmployeeProfileModule {}

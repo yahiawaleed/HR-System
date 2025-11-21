@@ -2,19 +2,22 @@ import { SchemaFactory, Schema, Prop } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 import { HydratedDocument } from "mongoose";
 import { ShiftAssignmentStatus } from "./enums/index";
+import { EmployeeProfile } from "../../employee-profile/models/employee-profile.schema";
+import { Department } from "../../organization-structure/models/department.schema";
+import { Position } from "../../organization-structure/models/position.schema";
 
 export type ShiftAssignmentDocument = HydratedDocument<ShiftAssignment>;
 
 @Schema()
 export class ShiftAssignment{
-    @Prop() // refrence employee id in the integration part
-    employeeId?: string;
+    @Prop({type: Types.ObjectId, ref: 'EmployeeProfile'})
+    employeeId?: Types.ObjectId;
 
-    @Prop()
-    departmentId?: string; // refrence department id in the integration part
+    @Prop({type: Types.ObjectId, ref: 'Department'})
+    departmentId?: Types.ObjectId;
 
-    @Prop()
-    positionId?: string; // refrence position id in the integration part
+    @Prop({type: Types.ObjectId, ref: 'Position'})
+    positionId?: Types.ObjectId;
 
     @Prop({type: Types.ObjectId, ref: 'Shift', required: true})
     shiftId: Types.ObjectId;
