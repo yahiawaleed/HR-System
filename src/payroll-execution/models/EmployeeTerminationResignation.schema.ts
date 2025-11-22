@@ -14,7 +14,7 @@ export class EmployeeTerminationResignation {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Employee.name, required: true })
     employeeId: mongoose.Types.ObjectId;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: terminationAndResignationBenefits.name, required: true })
-    allowanceId: mongoose.Types.ObjectId;
+    benefitId: mongoose.Types.ObjectId;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: TerminationRequest.name, required: true })
     terminationId: mongoose.Types.ObjectId;
     @Prop({ default: BenefitStatus.PENDING, type: String, enum: BenefitStatus })
