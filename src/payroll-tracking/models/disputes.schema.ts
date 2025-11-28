@@ -32,7 +32,7 @@ export class disputes {
     payslipId: mongoose.Types.ObjectId;
 
     @Prop({ required: true, type: String, enum: DisputeStatus, default: DisputeStatus.UNDER_REVIEW })
-    status: DisputeStatus;// under review, approved, rejected
+    status: DisputeStatus;// under review,pending_manager_approval, approved, rejected
 
     @Prop()
     rejectionReason?: string;
