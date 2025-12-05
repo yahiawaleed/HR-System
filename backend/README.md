@@ -1,98 +1,172 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# HR System Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive HR Management System built with NestJS, TypeScript, and MongoDB.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features Implemented
 
-## Description
+### ✅ Core Modules
+- **Authentication Module**: JWT-based authentication with role-based access control
+- **Employee Profile Module**: Complete employee data management with change request workflow
+- **Organization Structure Module**: Department and position management
+- **Performance Management Module**: Appraisal templates, cycles, and evaluations
+- **Payroll Tracking Module**: Payslips, claims, and disputes management
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### 🔄 Modules in Progress
+- Time Management Module
+- Leaves Management Module
+- Recruitment/Onboarding/Offboarding Modules
+- Payroll Configuration & Policy Setup
+- Payroll Processing & Execution
 
-## Project setup
+## Technology Stack
 
+- **Framework**: NestJS 11.x
+- **Language**: TypeScript
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT (JSON Web Tokens)
+- **Validation**: class-validator, class-transformer
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- MongoDB (local or cloud instance)
+- npm or yarn
+
+## Installation
+
+1. Install dependencies:
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+2. Set up environment variables:
+Create a `.env` file in the backend directory:
+```
+MONGODB_URI=mongodb://localhost:27017/hr-system
+JWT_SECRET=your-secret-key-change-in-production
+PORT=3000
+FRONTEND_URL=http://localhost:3001
 ```
 
-## Run tests
-
+3. Start the development server:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
+The API will be available at `http://localhost:3000`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## API Endpoints
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Authentication
+- `POST /auth/register` - Register a new user
+- `POST /auth/login` - Login and get JWT token
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+### Employees
+- `GET /employees` - Get all employees
+- `GET /employees/:id` - Get employee by ID
+- `POST /employees` - Create new employee
+- `PATCH /employees/:id` - Update employee
+- `GET /employees/department/:departmentId` - Get employees by department
+- `GET /employees/manager/:managerId` - Get employees by manager
+
+### Departments
+- `GET /departments` - Get all departments
+- `GET /departments/:id` - Get department by ID
+- `POST /departments` - Create new department
+- `PATCH /departments/:id` - Update department
+- `DELETE /departments/:id` - Deactivate department
+
+### Positions
+- `GET /positions` - Get all positions
+- `GET /positions/:id` - Get position by ID
+- `POST /positions` - Create new position
+- `PATCH /positions/:id` - Update position
+- `DELETE /positions/:id` - Deactivate position
+
+### Performance
+- `GET /performance/templates` - Get all appraisal templates
+- `POST /performance/templates` - Create appraisal template
+- `GET /performance/cycles` - Get all appraisal cycles
+- `POST /performance/cycles` - Create appraisal cycle
+- `GET /performance/appraisals` - Get all appraisals
+- `POST /performance/appraisals` - Create appraisal
+- `GET /performance/appraisals/:id` - Get appraisal by ID
+- `PATCH /performance/appraisals/:id` - Update appraisal
+
+### Payroll Tracking
+- `GET /payslips` - Get all payslips
+- `POST /payslips` - Create payslip
+- `GET /payslips/:id` - Get payslip by ID
+- `GET /payslips/employee/:employeeId` - Get payslips by employee
+- `GET /claims` - Get all claims
+- `POST /claims` - Create claim
+- `PATCH /claims/:id/status` - Update claim status
+- `GET /disputes` - Get all disputes
+- `POST /disputes` - Create dispute
+- `PATCH /disputes/:id/status` - Update dispute status
+
+## Project Structure
+
+```
+backend/
+├── src/
+│   ├── auth/                 # Authentication module
+│   │   ├── guards/          # JWT guards
+│   │   ├── strategies/      # Passport strategies
+│   │   ├── schemas/         # User schema
+│   │   └── dto/             # Data transfer objects
+│   ├── employee-profile/    # Employee management
+│   ├── organization-structure/ # Org structure management
+│   ├── performance/         # Performance appraisals
+│   ├── payroll-tracking/   # Payroll tracking
+│   └── app.module.ts        # Root module
+├── test/                    # E2E tests
+└── package.json
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Role-Based Access Control
 
-## Resources
+The system supports the following roles:
+- `system_admin` - Full system access
+- `hr_manager` - HR management access
+- `hr_employee` - HR employee access
+- `hr_admin` - HR administration
+- `payroll_manager` - Payroll management
+- `payroll_specialist` - Payroll operations
+- `finance_staff` - Finance access
+- `legal_admin` - Legal administration
+- `department_manager` - Department management
+- `line_manager` - Line management
+- `employee` - Employee self-service
 
-Check out a few resources that may come in handy when working with NestJS:
+## Development
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Running in development mode
+```bash
+npm run start:dev
+```
 
-## Support
+### Building for production
+```bash
+npm run build
+npm run start:prod
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Running tests
+```bash
+npm run test
+npm run test:e2e
+```
 
-## Stay in touch
+## Next Steps
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Complete remaining modules (Time Management, Leaves, Recruitment, Payroll subsystems)
+2. Add comprehensive validation and business logic
+3. Implement role-based access control guards
+4. Add comprehensive error handling
+5. Create frontend application with Next.js
+6. Set up deployment configuration
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED
