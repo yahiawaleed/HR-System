@@ -34,6 +34,7 @@ interface ShiftAssignment {
   employeeId?: { _id: string; firstName: string; lastName: string; employeeNumber: string };
   departmentId?: { _id: string; name: string };
   positionId?: { _id: string; title: string };
+  shiftTypeId?: { _id: string; name: string };
   shiftId?: { _id: string; name: string };
   startDate: string;
   endDate: string;
@@ -64,7 +65,7 @@ export default function ShiftAssignmentsTab() {
   const [userRole, setUserRole] = useState<string>('');
   const [formData, setFormData] = useState({
     employeeId: '',
-    shiftId: '',
+    shiftTypeId: '',
     startDate: '',
     endDate: '',
     status: 'PENDING' as 'PENDING' | 'APPROVED',
@@ -141,7 +142,7 @@ export default function ShiftAssignmentsTab() {
       toast.error('Please select an employee');
       return;
     }
-    if (!formData.shiftId) {
+    if (!formData.shiftTypeId) {
       toast.error('Please select a shift type');
       return;
     }
@@ -159,7 +160,7 @@ export default function ShiftAssignmentsTab() {
 
       const payload = {
         employeeId: formData.employeeId,
-        shiftId: formData.shiftId,
+        shiftTypeId: formData.shiftTypeId,
         startDate: formData.startDate,
         endDate: formData.endDate,
         status: formData.status,
@@ -252,7 +253,7 @@ export default function ShiftAssignmentsTab() {
   };
 
   const resetForm = () => {
-    setFormData({ employeeId: '', shiftId: '', startDate: '', endDate: '', status: 'PENDING' });
+    setFormData({ employeeId: '', shiftTypeId: '', startDate: '', endDate: '', status: 'PENDING' });
   };
 
   const handleOpenDialog = () => {
@@ -262,10 +263,10 @@ export default function ShiftAssignmentsTab() {
 
   const getStatusChip = (status: string) => {
     const statusStyles: Record<string, { bg: string; color: string }> = {
-      APPROVED: { bg: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white' },
-      PENDING: { bg: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: 'white' },
-      CANCELLED: { bg: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', color: 'white' },
-      EXPIRED: { bg: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)', color: 'white' },
+      APPROVED: { bg: '#DCFCE7', color: '#16A34A' },
+      PENDING: { bg: '#FEF3C7', color: '#D97706' },
+      CANCELLED: { bg: '#FEE2E2', color: '#DC2626' },
+      EXPIRED: { bg: '#F1F5F9', color: '#64748B' },
     };
     const style = statusStyles[status] || statusStyles.PENDING;
     return (
@@ -273,10 +274,10 @@ export default function ShiftAssignmentsTab() {
         label={status}
         size="small"
         sx={{
-          background: style.bg,
+          bgcolor: style.bg,
           color: style.color,
-          fontWeight: 600,
-          borderRadius: 2,
+          fontWeight: 500,
+          fontSize: '0.75rem',
         }}
       />
     );
@@ -290,124 +291,152 @@ export default function ShiftAssignmentsTab() {
   return (
     <Paper
       elevation={0}
+      className="tm-fade-in-up"
       sx={{
-        borderRadius: 4,
+        borderRadius: 3,
+        border: '1px solid rgba(139, 92, 246, 0.15)',
+        bgcolor: 'white',
         overflow: 'hidden',
-        background: 'white',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          boxShadow: '0 8px 32px rgba(139, 92, 246, 0.12)',
+        },
       }}
     >
-      {/* Header - Purple/Pink Theme */}
+      {/* Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
-          p: 3,
-          color: 'white',
+          p: 2.5,
+          borderBottom: '1px solid rgba(139, 92, 246, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(168, 85, 247, 0.03) 100%)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            className="tm-float"
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2.5,
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 20px rgba(139, 92, 246, 0.4)',
+            }}
+          >
+            <Users size={22} color="white" />
+          </Box>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', letterSpacing: '-0.01em' }}>
               Shift Assignments
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              {isEmployee ? 'View your assigned shifts' : 'Assign shifts to employees, departments, or positions'}
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
+              {isEmployee ? 'Your assigned shifts and schedules' : 'Assign and manage employee shift schedules'}
             </Typography>
           </Box>
-          {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<Plus size={20} />}
-              onClick={handleOpenDialog}
-              sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.3)',
-                  transform: 'scale(1.05)',
-                },
-                transition: 'all 0.3s ease',
-                borderRadius: 2,
-                px: 3,
-              }}
-            >
-              Assign Shift
-            </Button>
-          )}
         </Box>
+        {canCreate && (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={18} />}
+            onClick={handleOpenDialog}
+            className="tm-btn"
+            sx={{
+              background: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 2,
+              boxShadow: '0 4px 14px rgba(139, 92, 246, 0.35)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
+                boxShadow: '0 6px 20px rgba(139, 92, 246, 0.45)',
+              },
+            }}
+          >
+            Assign Shift
+          </Button>
+        )}
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 3 }}>
+      <Box>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-            <CircularProgress
-              sx={{
-                '& .MuiCircularProgress-circle': {
-                  stroke: 'url(#gradientPurple)',
-                },
-              }}
-            />
-            <svg width={0} height={0}>
-              <defs>
-                <linearGradient id="gradientPurple" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#9333EA" />
-                  <stop offset="100%" stopColor="#EC4899" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 10, gap: 2 }}>
+            <Box sx={{ position: 'relative' }}>
+              <CircularProgress size={40} sx={{ color: '#8B5CF6' }} />
+              <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                <Users size={16} color="#8B5CF6" />
+              </Box>
+            </Box>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>Loading shift assignments...</Typography>
           </Box>
         ) : (
-          <TableContainer>
+          <TableContainer className="tm-scrollbar">
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#FAF5FF' }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Assignee</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Shift Type</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Start Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>End Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Status</TableCell>
-                  {(canEdit || canDelete || canChangeStatus) && <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Actions</TableCell>}
+                <TableRow sx={{ bgcolor: 'rgba(139, 92, 246, 0.03)' }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Assignee</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Shift Type</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Start Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>End Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Status</TableCell>
+                  {(canEdit || canDelete || canChangeStatus) && <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Actions</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredAssignments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={(canEdit || canDelete || canChangeStatus) ? 6 : 5} align="center" sx={{ py: 8 }}>
-                      <Users size={48} color="#D8B4FE" style={{ marginBottom: 16 }} />
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
-                        No shift assignments found
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        {canCreate ? 'Create one to get started.' : 'No shifts assigned to you.'}
-                      </Typography>
+                    <TableCell colSpan={(canEdit || canDelete || canChangeStatus) ? 6 : 5} align="center" sx={{ py: 10 }}>
+                      <Box className="tm-empty-state">
+                        <Box className="tm-empty-state-icon" sx={{ mb: 2 }}>
+                          <Users size={48} color="#CBD5E1" />
+                        </Box>
+                        <Typography sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
+                          No shift assignments found
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                          {canCreate ? 'Assign your first shift to get started' : 'No shifts assigned'}
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredAssignments.map((assignment) => (
+                  filteredAssignments.map((assignment, index) => (
                     <TableRow
                       key={assignment._id}
+                      className="tm-table-row tm-table-highlight"
                       sx={{
-                        '&:hover': {
-                          bgcolor: '#FAF5FF',
-                        },
-                        transition: 'all 0.2s ease',
+                        '&:hover': { bgcolor: 'rgba(139, 92, 246, 0.04)' },
+                        animation: 'fadeInUp 0.4s ease-out',
+                        animationDelay: `${index * 60}ms`,
+                        animationFillMode: 'both',
                       }}
                     >
                       <TableCell>
                         {assignment.employeeId && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Paper
-                              elevation={0}
+                            <Box
                               sx={{
-                                p: 1,
-                                background: 'linear-gradient(135deg, #E9D5FF 0%, #D8B4FE 100%)',
-                                borderRadius: 2,
+                                width: 36,
+                                height: 36,
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 3px 10px rgba(139, 92, 246, 0.3)',
                               }}
                             >
-                              <User size={16} color="#9333EA" />
-                            </Paper>
+                              <User size={16} color="white" />
+                            </Box>
                             <Box>
-                              <Typography sx={{ fontWeight: 600 }}>
+                              <Typography sx={{ fontWeight: 600, color: '#1E293B', fontSize: '0.875rem' }}>
                                 {assignment.employeeId.firstName} {assignment.employeeId.lastName}
                               </Typography>
                               <Typography variant="caption" sx={{ color: '#94A3B8' }}>
@@ -418,85 +447,59 @@ export default function ShiftAssignmentsTab() {
                         )}
                         {assignment.departmentId && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Paper
-                              elevation={0}
-                              sx={{
-                                p: 1,
-                                background: 'linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%)',
-                                borderRadius: 2,
-                              }}
-                            >
-                              <Building2 size={16} color="#2563EB" />
-                            </Paper>
-                            <Typography sx={{ fontWeight: 600 }}>{assignment.departmentId.name}</Typography>
+                            <Box sx={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(59, 130, 246, 0.3)' }}>
+                              <Building2 size={16} color="white" />
+                            </Box>
+                            <Typography sx={{ fontWeight: 600, color: '#1E293B' }}>{assignment.departmentId.name}</Typography>
                           </Box>
                         )}
                         {assignment.positionId && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Paper
-                              elevation={0}
-                              sx={{
-                                p: 1,
-                                background: 'linear-gradient(135deg, #FED7AA 0%, #FDBA74 100%)',
-                                borderRadius: 2,
-                              }}
-                            >
-                              <Briefcase size={16} color="#EA580C" />
-                            </Paper>
-                            <Typography sx={{ fontWeight: 600 }}>{assignment.positionId.title}</Typography>
+                            <Box sx={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(245, 158, 11, 0.3)' }}>
+                              <Briefcase size={16} color="white" />
+                            </Box>
+                            <Typography sx={{ fontWeight: 600, color: '#1E293B' }}>{assignment.positionId.title}</Typography>
                           </Box>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Typography sx={{ fontWeight: 600 }}>{assignment.shiftId?.name || 'N/A'}</Typography>
+                        <Typography sx={{ fontWeight: 600, color: '#1E293B' }}>{assignment.shiftTypeId?.name || 'N/A'}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {new Date(assignment.startDate).toLocaleDateString()}
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
+                          {new Date(assignment.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {new Date(assignment.endDate).toLocaleDateString()}
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
+                          {new Date(assignment.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </Typography>
                       </TableCell>
                       <TableCell>{getStatusChip(assignment.status)}</TableCell>
                       {(canEdit || canDelete || canChangeStatus) && (
                         <TableCell align="right">
-                          {canChangeStatus && (
-                            <IconButton
-                              onClick={() => {
-                                setSelectedAssignment(assignment);
-                                setStatusDialogOpen(true);
-                              }}
-                              sx={{
-                                color: '#9333EA',
-                                '&:hover': {
-                                  bgcolor: '#E9D5FF',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                                mr: 1,
-                              }}
-                            >
-                              <Edit size={18} />
-                            </IconButton>
-                          )}
-                          {canDelete && (
-                            <IconButton
-                              onClick={() => handleDelete(assignment._id)}
-                              sx={{
-                                color: '#DC2626',
-                                '&:hover': {
-                                  bgcolor: '#FEE2E2',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              <Trash2 size={18} />
-                            </IconButton>
-                          )}
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                            {canChangeStatus && (
+                              <IconButton
+                                size="small"
+                                onClick={() => { setSelectedAssignment(assignment); setStatusDialogOpen(true); }}
+                                className="tm-icon-btn"
+                                sx={{ color: '#64748B', '&:hover': { bgcolor: 'rgba(139, 92, 246, 0.1)', color: '#8B5CF6' } }}
+                              >
+                                <Edit size={16} />
+                              </IconButton>
+                            )}
+                            {canDelete && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDelete(assignment._id)}
+                                className="tm-icon-btn"
+                                sx={{ color: '#64748B', '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' } }}
+                              >
+                                <Trash2 size={16} />
+                              </IconButton>
+                            )}
+                          </Box>
                         </TableCell>
                       )}
                     </TableRow>
@@ -515,38 +518,30 @@ export default function ShiftAssignmentsTab() {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.3)',
-          },
+          className: 'tm-dialog',
+          sx: { borderRadius: 3 },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '1.5rem',
+            fontWeight: 600,
+            pb: 1,
+            background: 'linear-gradient(135deg, #F5F3FF 0%, #F8FAFC 100%)',
+            borderBottom: '1px solid #E2E8F0',
           }}
         >
           Assign Shift
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <FormControl fullWidth>
-                  <InputLabel sx={{ '&.Mui-focused': { color: '#9333EA' } }}>Employee</InputLabel>
+                  <InputLabel>Employee</InputLabel>
                   <Select
-                    value={formData.employeeId}
+                    value={formData.employeeId || ''}
                     label="Employee"
                     onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                    sx={{
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#9333EA',
-                        borderWidth: 2,
-                      },
-                    }}
                   >
                     {employees.map((emp) => (
                       <MenuItem key={emp._id} value={emp._id}>
@@ -556,17 +551,11 @@ export default function ShiftAssignmentsTab() {
                   </Select>
                 </FormControl>
                 <FormControl fullWidth>
-                  <InputLabel sx={{ '&.Mui-focused': { color: '#9333EA' } }}>Shift Type</InputLabel>
+                  <InputLabel>Shift Type</InputLabel>
                   <Select
-                    value={formData.shiftId}
+                    value={formData.shiftTypeId || ''}
                     label="Shift Type"
-                    onChange={(e) => setFormData({ ...formData, shiftId: e.target.value })}
-                    sx={{
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#9333EA',
-                        borderWidth: 2,
-                      },
-                    }}
+                    onChange={(e) => setFormData({ ...formData, shiftTypeId: e.target.value })}
                   >
                     {shiftTypes.map((shift) => (
                       <MenuItem key={shift._id} value={shift._id}>
@@ -585,17 +574,6 @@ export default function ShiftAssignmentsTab() {
                   required
                   fullWidth
                   slotProps={{ inputLabel: { shrink: true } }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#9333EA',
-                        borderWidth: 2,
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#9333EA',
-                    },
-                  }}
                 />
                 <TextField
                   label="End Date"
@@ -605,31 +583,14 @@ export default function ShiftAssignmentsTab() {
                   required
                   fullWidth
                   slotProps={{ inputLabel: { shrink: true } }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#9333EA',
-                        borderWidth: 2,
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#9333EA',
-                    },
-                  }}
                 />
               </Box>
               <FormControl fullWidth>
-                <InputLabel sx={{ '&.Mui-focused': { color: '#9333EA' } }}>Status</InputLabel>
+                <InputLabel>Status</InputLabel>
                 <Select
-                  value={formData.status}
+                  value={formData.status || 'PENDING'}
                   label="Status"
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                  sx={{
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#9333EA',
-                      borderWidth: 2,
-                    },
-                  }}
                 >
                   <MenuItem value="PENDING">Pending</MenuItem>
                   <MenuItem value="APPROVED">Approved</MenuItem>
@@ -637,30 +598,22 @@ export default function ShiftAssignmentsTab() {
               </FormControl>
             </Box>
           </DialogContent>
-          <DialogActions sx={{ p: 3, gap: 1 }}>
-            <Button
-              onClick={() => setDialogOpen(false)}
-              sx={{
-                color: '#64748B',
-                '&:hover': {
-                  bgcolor: '#F1F5F9',
-                },
-              }}
-            >
+          <DialogActions sx={{ p: 2.5, pt: 0 }}>
+            <Button onClick={() => setDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748B' }}>
               Cancel
             </Button>
             <Button
               type="submit"
               variant="contained"
+              className="tm-btn"
               sx={{
-                background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #7C3AED 0%, #DB2777 100%)',
-                  transform: 'scale(1.02)',
-                },
-                transition: 'all 0.3s ease',
-                px: 4,
+                textTransform: 'none',
+                background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                px: 3,
                 borderRadius: 2,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)',
+                },
               }}
             >
               Assign Shift
@@ -676,17 +629,16 @@ export default function ShiftAssignmentsTab() {
         maxWidth="xs"
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 40px -10px rgba(147, 51, 234, 0.3)',
-          },
+          className: 'tm-dialog',
+          sx: { borderRadius: 3 },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
-            color: 'white',
-            fontWeight: 700,
+            fontWeight: 600,
+            pb: 1,
+            background: 'linear-gradient(135deg, #F5F3FF 0%, #F8FAFC 100%)',
+            borderBottom: '1px solid #E2E8F0',
           }}
         >
           Update Status
@@ -695,62 +647,47 @@ export default function ShiftAssignmentsTab() {
           <Typography variant="body2" sx={{ mb: 2, color: '#64748B' }}>
             Change the status of this shift assignment
           </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
             <Button
               onClick={() => handleStatusUpdate('APPROVED')}
               variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                },
-              }}
+              size="small"
+              className="tm-btn"
+              sx={{ bgcolor: '#16A34A', textTransform: 'none', '&:hover': { bgcolor: '#15803D' } }}
             >
               Approve
             </Button>
             <Button
               onClick={() => handleStatusUpdate('PENDING')}
               variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)',
-                },
-              }}
+              size="small"
+              className="tm-btn"
+              sx={{ bgcolor: '#D97706', textTransform: 'none', '&:hover': { bgcolor: '#B45309' } }}
             >
               Set Pending
             </Button>
             <Button
               onClick={() => handleStatusUpdate('CANCELLED')}
               variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)',
-                },
-              }}
+              size="small"
+              className="tm-btn"
+              sx={{ bgcolor: '#DC2626', textTransform: 'none', '&:hover': { bgcolor: '#B91C1C' } }}
             >
               Cancel
             </Button>
             <Button
               onClick={() => handleStatusUpdate('EXPIRED')}
               variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #4B5563 0%, #374151 100%)',
-                },
-              }}
+              size="small"
+              className="tm-btn"
+              sx={{ bgcolor: '#64748B', textTransform: 'none', '&:hover': { bgcolor: '#475569' } }}
             >
               Mark Expired
             </Button>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button
-            onClick={() => setStatusDialogOpen(false)}
-            sx={{ color: '#64748B' }}
-          >
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setStatusDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748B' }}>
             Close
           </Button>
         </DialogActions>

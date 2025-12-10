@@ -183,124 +183,148 @@ export default function ScheduleRulesTab() {
   return (
     <Paper
       elevation={0}
+      className="tm-fade-in-up"
       sx={{
-        borderRadius: 4,
+        borderRadius: 3,
+        border: '1px solid rgba(16, 185, 129, 0.15)',
+        bgcolor: 'white',
         overflow: 'hidden',
-        background: 'white',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          boxShadow: '0 8px 32px rgba(16, 185, 129, 0.12)',
+        },
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-          p: 3,
-          color: 'white',
+          p: 2.5,
+          borderBottom: '1px solid rgba(16, 185, 129, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(20, 184, 166, 0.03) 100%)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            className="tm-float"
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2.5,
+              background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
+            }}
+          >
+            <Calendar size={22} color="white" />
+          </Box>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', letterSpacing: '-0.01em' }}>
               Schedule Rules
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Define custom scheduling patterns
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
+              Define custom scheduling patterns and policies
             </Typography>
           </Box>
-          {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<Plus size={20} />}
-              onClick={handleOpenDialog}
-              sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.3)',
-                  transform: 'scale(1.05)',
-                },
-                transition: 'all 0.3s ease',
-                borderRadius: 2,
-                px: 3,
-              }}
-            >
-              Add Schedule Rule
-            </Button>
-          )}
         </Box>
+        {canCreate && (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={18} />}
+            onClick={handleOpenDialog}
+            className="tm-btn"
+            sx={{
+              background: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 2,
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #059669 0%, #0D9488 100%)',
+                boxShadow: '0 6px 20px rgba(16, 185, 129, 0.45)',
+              },
+            }}
+          >
+            Add Rule
+          </Button>
+        )}
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 3 }}>
+      <Box>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-            <CircularProgress
-              sx={{
-                '& .MuiCircularProgress-circle': {
-                  stroke: 'url(#gradient)',
-                },
-              }}
-            />
-            <svg width={0} height={0}>
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#059669" />
-                  <stop offset="100%" stopColor="#10B981" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 10, gap: 2 }}>
+            <Box sx={{ position: 'relative' }}>
+              <CircularProgress size={40} sx={{ color: '#10B981' }} />
+              <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                <Calendar size={16} color="#10B981" />
+              </Box>
+            </Box>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>Loading schedule rules...</Typography>
           </Box>
         ) : (
-          <TableContainer>
+          <TableContainer className="tm-scrollbar">
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#F8FAFC' }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Pattern</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Status</TableCell>
-                  {(canEdit || canDelete) && <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Actions</TableCell>}
+                <TableRow sx={{ bgcolor: 'rgba(16, 185, 129, 0.03)' }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Pattern</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Status</TableCell>
+                  {(canEdit || canDelete) && <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Actions</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {scheduleRules.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={(canEdit || canDelete) ? 4 : 3} align="center" sx={{ py: 8 }}>
-                      <Calendar size={48} color="#CBD5E1" style={{ marginBottom: 16 }} />
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
-                        No schedule rules found
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        {canCreate ? 'Create one to get started.' : 'No schedule rules available.'}
-                      </Typography>
+                    <TableCell colSpan={(canEdit || canDelete) ? 4 : 3} sx={{ py: 10, textAlign: 'center' }}>
+                      <Box className="tm-empty-state">
+                        <Box className="tm-empty-state-icon" sx={{ mb: 2 }}>
+                          <Calendar size={48} color="#CBD5E1" />
+                        </Box>
+                        <Typography sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
+                          No schedule rules found
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                          {canCreate ? 'Create your first rule to get started' : 'No schedule rules available'}
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  scheduleRules.map((rule) => (
+                  scheduleRules.map((rule, index) => (
                     <TableRow
                       key={rule._id}
+                      className="tm-table-row tm-table-highlight"
                       sx={{
-                        '&:hover': {
-                          bgcolor: '#F1F5F9',
-                        },
-                        transition: 'all 0.2s ease',
+                        '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.04)' },
+                        animation: 'fadeInUp 0.4s ease-out',
+                        animationDelay: `${index * 60}ms`,
+                        animationFillMode: 'both',
                       }}
                     >
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Paper
-                            elevation={0}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
                             sx={{
-                              p: 1,
-                              background: 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)',
-                              borderRadius: 2,
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              bgcolor: rule.active ? '#10B981' : '#94A3B8',
+                              boxShadow: rule.active ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none',
+                              transition: 'all 0.3s ease',
                             }}
-                          >
-                            <Calendar size={16} color="#059669" />
-                          </Paper>
-                          <Typography sx={{ fontWeight: 600 }}>{rule.name}</Typography>
+                          />
+                          <Typography sx={{ fontWeight: 600, color: '#1E293B' }}>{rule.name}</Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" sx={{ color: '#64748B', maxWidth: 300 }}>
+                        <Typography variant="body2" sx={{ color: '#64748B', maxWidth: 280, fontWeight: 500 }}>
                           {rule.pattern}
                         </Typography>
                       </TableCell>
@@ -308,49 +332,46 @@ export default function ScheduleRulesTab() {
                         <Chip
                           label={rule.active ? 'Active' : 'Inactive'}
                           size="small"
+                          className="tm-chip"
                           sx={{
-                            background: rule.active
-                              ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                              : '#E2E8F0',
-                            color: rule.active ? 'white' : '#64748B',
+                            bgcolor: rule.active ? '#DCFCE7' : '#F1F5F9',
+                            color: rule.active ? '#059669' : '#64748B',
                             fontWeight: 600,
-                            borderRadius: 2,
+                            fontSize: '0.75rem',
+                            border: rule.active ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid #E2E8F0',
                           }}
                         />
                       </TableCell>
                       {(canEdit || canDelete) && (
                         <TableCell align="right">
-                          {canEdit && (
-                            <IconButton
-                              onClick={() => handleEdit(rule)}
-                              sx={{
-                                color: '#059669',
-                                '&:hover': {
-                                  bgcolor: '#D1FAE5',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                                mr: 1,
-                              }}
-                            >
-                              <Edit size={18} />
-                            </IconButton>
-                          )}
-                          {canDelete && (
-                            <IconButton
-                              onClick={() => handleDelete(rule._id)}
-                              sx={{
-                                color: '#DC2626',
-                                '&:hover': {
-                                  bgcolor: '#FEE2E2',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              <Trash2 size={18} />
-                            </IconButton>
-                          )}
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                            {canEdit && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleEdit(rule)}
+                                className="tm-icon-btn"
+                                sx={{
+                                  color: '#64748B',
+                                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)', color: '#10B981' },
+                                }}
+                              >
+                                <Edit size={16} />
+                              </IconButton>
+                            )}
+                            {canDelete && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDelete(rule._id)}
+                                className="tm-icon-btn"
+                                sx={{
+                                  color: '#64748B',
+                                  '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' },
+                                }}
+                              >
+                                <Trash2 size={16} />
+                              </IconButton>
+                            )}
+                          </Box>
                         </TableCell>
                       )}
                     </TableRow>
@@ -369,25 +390,21 @@ export default function ScheduleRulesTab() {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 40px -10px rgba(5, 150, 105, 0.3)',
-          },
+          className: 'tm-dialog',
+          sx: { borderRadius: 3 },
         }}
       >
-        <DialogTitle
-          sx={{
-            background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '1.5rem',
-          }}
-        >
+        <DialogTitle sx={{ 
+          fontWeight: 600, 
+          pb: 1,
+          background: 'linear-gradient(135deg, #ECFDF5 0%, #F8FAFC 100%)',
+          borderBottom: '1px solid #E2E8F0',
+        }}>
           {editingRule ? 'Edit' : 'Create'} Schedule Rule
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <TextField
                 label="Rule Name"
                 placeholder="e.g., Flexible Working Hours"
@@ -395,91 +412,48 @@ export default function ScheduleRulesTab() {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 fullWidth
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#059669',
-                      borderWidth: 2,
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#059669',
-                  },
-                }}
               />
               <TextField
                 label="Pattern Description"
-                placeholder="e.g., Core hours: 11 AM - 3 PM. Flex-in: 8-11 AM. Flex-out: 3-7 PM"
+                placeholder="e.g., Core hours: 11 AM - 3 PM"
                 value={formData.pattern}
                 onChange={(e) => setFormData({ ...formData, pattern: e.target.value })}
                 required
                 multiline
-                rows={4}
+                rows={3}
                 fullWidth
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#059669',
-                      borderWidth: 2,
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#059669',
-                  },
-                }}
               />
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  bgcolor: '#F8FAFC',
-                  borderRadius: 2,
-                }}
-              >
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.active}
-                      onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: '#10B981',
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          bgcolor: '#10B981',
-                        },
-                      }}
-                    />
-                  }
-                  label={<Typography sx={{ fontWeight: 600 }}>Active Status</Typography>}
-                />
-              </Paper>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#10B981' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#10B981' },
+                    }}
+                  />
+                }
+                label={<Typography sx={{ fontWeight: 500 }}>Active</Typography>}
+              />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ p: 3, gap: 1 }}>
-            <Button
-              onClick={() => setDialogOpen(false)}
-              sx={{
-                color: '#64748B',
-                '&:hover': {
-                  bgcolor: '#F1F5F9',
-                },
-              }}
-            >
+          <DialogActions sx={{ p: 2.5, pt: 0 }}>
+            <Button onClick={() => setDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748B' }}>
               Cancel
             </Button>
             <Button
               type="submit"
               variant="contained"
+              className="tm-btn"
               sx={{
-                background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #047857 0%, #059669 100%)',
-                  transform: 'scale(1.02)',
-                },
-                transition: 'all 0.3s ease',
-                px: 4,
+                textTransform: 'none',
+                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                px: 3,
                 borderRadius: 2,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                },
               }}
             >
               {editingRule ? 'Update' : 'Create'}

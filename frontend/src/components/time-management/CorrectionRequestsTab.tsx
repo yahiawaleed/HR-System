@@ -29,8 +29,11 @@ import {
   MenuItem,
   Alert,
   Grid,
+  Avatar,
+  Tooltip,
+  LinearProgress,
 } from '@mui/material';
-import { Plus, CheckCircle, XCircle, Clock, Eye, FileEdit, Send } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, Clock, Eye, FileEdit, Send, AlertCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface RequestedPunch {
@@ -224,11 +227,11 @@ export default function CorrectionRequestsTab() {
   };
 
   const getStatusChip = (status: string) => {
-    const statusConfig: Record<string, { bgcolor: string; color: string; icon: React.ReactNode }> = {
-      SUBMITTED: { bgcolor: '#e3f2fd', color: '#1565c0', icon: <Clock size={14} /> },
-      IN_REVIEW: { bgcolor: '#fff3e0', color: '#e65100', icon: <Clock size={14} /> },
-      APPROVED: { bgcolor: '#e8f5e9', color: '#2e7d32', icon: <CheckCircle size={14} /> },
-      REJECTED: { bgcolor: '#ffebee', color: '#c62828', icon: <XCircle size={14} /> },
+    const statusConfig: Record<string, { bgcolor: string; color: string; icon: React.ReactNode; gradient?: string }> = {
+      SUBMITTED: { bgcolor: '#DBEAFE', color: '#2563EB', icon: <Clock size={14} />, gradient: 'linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)' },
+      IN_REVIEW: { bgcolor: '#FEF3C7', color: '#D97706', icon: <AlertCircle size={14} />, gradient: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)' },
+      APPROVED: { bgcolor: '#DCFCE7', color: '#059669', icon: <CheckCircle size={14} />, gradient: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)' },
+      REJECTED: { bgcolor: '#FEE2E2', color: '#DC2626', icon: <XCircle size={14} />, gradient: 'linear-gradient(135deg, #EF4444 0%, #F87171 100%)' },
     };
 
     const config = statusConfig[status] || statusConfig.SUBMITTED;
@@ -238,46 +241,90 @@ export default function CorrectionRequestsTab() {
         size="small"
         icon={config.icon as any}
         label={status}
-        sx={{ bgcolor: config.bgcolor, color: config.color }}
+        className="tm-chip"
+        sx={{ 
+          bgcolor: config.bgcolor, 
+          color: config.color,
+          fontWeight: 600,
+          fontSize: '0.7rem',
+          border: `1px solid ${config.color}20`,
+        }}
       />
     );
   };
 
   const renderRequestsTable = (data: CorrectionRequest[], showActions: boolean = false) => (
-    <TableContainer>
+    <TableContainer className="tm-scrollbar">
       <Table>
-        <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+        <TableHead sx={{ bgcolor: 'rgba(20, 184, 166, 0.04)' }}>
           <TableRow>
-            {canReview && <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>}
-            <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Requested Punches</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Reason</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Submitted</TableCell>
-            <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
+            {canReview && <TableCell sx={{ fontWeight: 600, color: '#0D9488', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Employee</TableCell>}
+            <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date</TableCell>
+            <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Requested Punches</TableCell>
+            <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Reason</TableCell>
+            <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</TableCell>
+            <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Submitted</TableCell>
+            <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={canReview ? 7 : 6} align="center" sx={{ py: 4, color: '#666' }}>
-                No correction requests found
+              <TableCell colSpan={canReview ? 7 : 6} align="center" sx={{ py: 8 }}>
+                <Box className="tm-empty-state">
+                  <Box className="tm-empty-state-icon" sx={{ mb: 2 }}>
+                    <FileEdit size={48} color="#CBD5E1" />
+                  </Box>
+                  <Typography sx={{ fontWeight: 600, color: '#64748B' }}>
+                    No correction requests found
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#94A3B8', mt: 0.5 }}>
+                    Requests will appear here when submitted
+                  </Typography>
+                </Box>
               </TableCell>
             </TableRow>
           ) : (
-            data.map((request) => (
-              <TableRow key={request._id} hover>
+            data.map((request, index) => (
+              <TableRow 
+                key={request._id} 
+                className="tm-table-row tm-table-highlight"
+                sx={{
+                  animation: 'fadeInUp 0.4s ease-out',
+                  animationDelay: `${index * 50}ms`,
+                  animationFillMode: 'both',
+                  '&:hover': { bgcolor: 'rgba(20, 184, 166, 0.04)' },
+                }}
+              >
                 {canReview && (
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {request.employeeId?.fullName || 'Unknown'}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#666' }}>
-                      {request.employeeId?.employeeNumber}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          background: 'linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%)',
+                          boxShadow: '0 3px 10px rgba(20, 184, 166, 0.3)',
+                        }}
+                      >
+                        {request.employeeId?.fullName?.charAt(0) || 'U'}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
+                          {request.employeeId?.fullName || 'Unknown'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+                          {request.employeeId?.employeeNumber}
+                        </Typography>
+                      </Box>
+                    </Box>
                   </TableCell>
                 )}
-                <TableCell>{formatDate(request.date)}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>{formatDate(request.date)}</Typography>
+                </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                     {request.requestedPunches.map((punch, idx) => (
@@ -285,49 +332,64 @@ export default function CorrectionRequestsTab() {
                         key={idx}
                         size="small"
                         label={`${punch.type} ${formatTime(punch.time)}`}
+                        className="tm-chip"
                         sx={{
-                          bgcolor: punch.type === 'IN' ? '#e8f5e9' : '#ffebee',
-                          color: punch.type === 'IN' ? '#2e7d32' : '#c62828',
+                          bgcolor: punch.type === 'IN' ? '#DCFCE7' : '#FEE2E2',
+                          color: punch.type === 'IN' ? '#059669' : '#DC2626',
                           fontSize: '0.7rem',
+                          fontWeight: 600,
+                          border: punch.type === 'IN' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(220, 38, 38, 0.2)',
                         }}
                       />
                     ))}
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {request.reason}
-                  </Typography>
+                  <Tooltip title={request.reason} placement="top">
+                    <Typography variant="body2" sx={{ 
+                      maxWidth: 180, 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis', 
+                      whiteSpace: 'nowrap',
+                      color: '#64748B',
+                    }}>
+                      {request.reason}
+                    </Typography>
+                  </Tooltip>
                 </TableCell>
                 <TableCell>{getStatusChip(request.status)}</TableCell>
                 <TableCell>
-                  <Typography variant="caption" sx={{ color: '#666' }}>
+                  <Typography variant="caption" sx={{ color: '#94A3B8' }}>
                     {formatDate(request.createdAt)}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setDetailDialogOpen(true);
-                    }}
-                    sx={{ color: '#9c27b0' }}
-                  >
-                    <Eye size={18} />
-                  </IconButton>
-                  {showActions && request.status === 'SUBMITTED' && canReview && (
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         setSelectedRequest(request);
-                        setReviewDialogOpen(true);
+                        setDetailDialogOpen(true);
                       }}
-                      sx={{ color: '#4caf50' }}
+                      className="tm-icon-btn"
+                      sx={{ color: '#8B5CF6', '&:hover': { bgcolor: 'rgba(139, 92, 246, 0.1)' } }}
                     >
-                      <CheckCircle size={18} />
+                      <Eye size={18} />
                     </IconButton>
-                  )}
+                    {showActions && request.status === 'SUBMITTED' && canReview && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          setReviewDialogOpen(true);
+                        }}
+                        className="tm-icon-btn"
+                        sx={{ color: '#10B981', '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.1)' } }}
+                      >
+                        <CheckCircle size={18} />
+                      </IconButton>
+                    )}
+                  </Box>
                 </TableCell>
               </TableRow>
             ))
@@ -339,43 +401,211 @@ export default function CorrectionRequestsTab() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <CircularProgress sx={{ color: '#9c27b0' }} />
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: 400, gap: 2 }}>
+        <Box sx={{ position: 'relative' }}>
+          <CircularProgress size={48} sx={{ color: '#14B8A6' }} />
+          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+            <FileEdit size={20} color="#14B8A6" />
+          </Box>
+        </Box>
+        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>Loading correction requests...</Typography>
       </Box>
     );
   }
 
   return (
-    <Box>
-      {/* Header */}
+    <Box className="tm-fade-in-up">
+        {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: '#333' }}>
-          <FileEdit style={{ marginRight: 8, verticalAlign: 'middle', color: '#9c27b0' }} />
-          Correction Requests
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            className="tm-float"
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(20, 184, 166, 0.35)',
+            }}
+          >
+            <FileEdit size={24} color="white" />
+          </Box>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>
+              Correction Requests
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>
+              Submit and manage attendance corrections
+            </Typography>
+          </Box>
+        </Box>
         <Button
           variant="contained"
-          startIcon={<Plus />}
+          startIcon={<Plus size={18} />}
           onClick={() => setCreateDialogOpen(true)}
+          className="tm-btn"
           sx={{
-            background: 'linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)',
-            '&:hover': { background: 'linear-gradient(135deg, #7b1fa2 0%, #c2185b 100%)' },
+            background: 'linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%)',
+            '&:hover': { 
+              background: 'linear-gradient(135deg, #0D9488 0%, #0891B2 100%)',
+              boxShadow: '0 8px 28px rgba(20, 184, 166, 0.45)',
+            },
+            borderRadius: 2.5,
+            px: 3,
+            py: 1.25,
+            fontWeight: 600,
+            boxShadow: '0 6px 20px rgba(20, 184, 166, 0.35)',
           }}
         >
           New Request
         </Button>
       </Box>
 
+      {/* Stats Cards */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+        <Paper 
+          elevation={0}
+          className="tm-stat-card tm-hover-lift"
+          sx={{ 
+            flex: 1, 
+            minWidth: 150,
+            p: 2.5, 
+            borderRadius: 3, 
+            border: '1px solid rgba(59, 130, 246, 0.15)',
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%)',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="caption" sx={{ color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.65rem' }}>
+                My Requests
+              </Typography>
+              <Typography variant="h4" className="tm-stat-value" sx={{ fontWeight: 700, color: '#3B82F6' }}>
+                {myRequests.length}
+              </Typography>
+            </Box>
+            <Box sx={{ 
+              width: 40, 
+              height: 40, 
+              borderRadius: 2, 
+              bgcolor: '#DBEAFE',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Send size={18} color="#3B82F6" />
+            </Box>
+          </Box>
+        </Paper>
+        {canViewPendingTab && (
+          <Paper 
+            elevation={0}
+            className="tm-stat-card tm-hover-lift"
+            sx={{ 
+              flex: 1, 
+              minWidth: 150,
+              p: 2.5, 
+              borderRadius: 3, 
+              border: '1px solid rgba(245, 158, 11, 0.15)',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(249, 115, 22, 0.02) 100%)',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.65rem' }}>
+                  Pending Approval
+                </Typography>
+                <Typography variant="h4" className="tm-stat-value" sx={{ fontWeight: 700, color: '#F59E0B' }}>
+                  {pendingRequests.length}
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                width: 40, 
+                height: 40, 
+                borderRadius: 2, 
+                bgcolor: '#FEF3C7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Clock size={18} color="#F59E0B" />
+              </Box>
+            </Box>
+          </Paper>
+        )}
+        {canViewAllRequests && (
+          <Paper 
+            elevation={0}
+            className="tm-stat-card tm-hover-lift"
+            sx={{ 
+              flex: 1, 
+              minWidth: 150,
+              p: 2.5, 
+              borderRadius: 3, 
+              border: '1px solid rgba(139, 92, 246, 0.15)',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(168, 85, 247, 0.02) 100%)',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="caption" sx={{ color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.65rem' }}>
+                  Total Requests
+                </Typography>
+                <Typography variant="h4" className="tm-stat-value" sx={{ fontWeight: 700, color: '#8B5CF6' }}>
+                  {requests.length}
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                width: 40, 
+                height: 40, 
+                borderRadius: 2, 
+                bgcolor: '#EDE9FE',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Sparkles size={18} color="#8B5CF6" />
+              </Box>
+            </Box>
+          </Paper>
+        )}
+      </Box>
+
       {/* Tabs */}
-      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+      <Paper elevation={0} sx={{ 
+        borderRadius: 3, 
+        overflow: 'hidden', 
+        border: '1px solid rgba(20, 184, 166, 0.2)',
+        boxShadow: '0 2px 12px rgba(20, 184, 166, 0.08)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          boxShadow: '0 8px 32px rgba(20, 184, 166, 0.15)',
+        },
+      }}>
         <Tabs
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
           sx={{
-            borderBottom: '1px solid #e0e0e0',
-            '& .MuiTab-root': { fontWeight: 600 },
-            '& .Mui-selected': { color: '#9c27b0' },
-            '& .MuiTabs-indicator': { bgcolor: '#9c27b0' },
+            borderBottom: '1px solid rgba(20, 184, 166, 0.15)',
+            bgcolor: 'rgba(20, 184, 166, 0.04)',
+            '& .MuiTab-root': { 
+              fontWeight: 600,
+              textTransform: 'none',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                bgcolor: 'rgba(20, 184, 166, 0.06)',
+              },
+            },
+            '& .Mui-selected': { color: '#0D9488 !important' },
+            '& .MuiTabs-indicator': { 
+              background: 'linear-gradient(90deg, #14B8A6 0%, #06B6D4 100%)', 
+              borderRadius: '3px 3px 0 0',
+              height: 3,
+              boxShadow: '0 -2px 10px rgba(20, 184, 166, 0.4)',
+            },
           }}
         >
           <Tab label={`My Requests (${myRequests.length})`} />
@@ -391,8 +621,23 @@ export default function CorrectionRequestsTab() {
       </Paper>
 
       {/* Create Request Dialog */}
-      <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: '#9c27b0', color: 'white' }}>
+      <Dialog 
+        open={createDialogOpen} 
+        onClose={() => setCreateDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 20px 60px rgba(20, 184, 166, 0.25)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)', 
+          color: 'white',
+          borderRadius: '12px 12px 0 0',
+        }}>
           <Send style={{ marginRight: 8, verticalAlign: 'middle' }} />
           Submit Correction Request
         </DialogTitle>
@@ -459,7 +704,7 @@ export default function CorrectionRequestsTab() {
               ...newRequest,
               requestedPunches: [...newRequest.requestedPunches, { type: 'OUT', time: '' }]
             })}
-            sx={{ mb: 2, color: '#9c27b0' }}
+            sx={{ mb: 2, color: '#14B8A6' }}
           >
             + Add Punch
           </Button>
@@ -475,13 +720,18 @@ export default function CorrectionRequestsTab() {
             required
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+        <DialogActions sx={{ p: 2, bgcolor: 'rgba(20, 184, 166, 0.03)' }}>
+          <Button onClick={() => setCreateDialogOpen(false)} sx={{ color: '#666' }}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleCreateRequest}
             disabled={!newRequest.date || !newRequest.reason}
-            sx={{ background: 'linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)' }}
+            sx={{ 
+              background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)',
+              },
+            }}
           >
             Submit Request
           </Button>
@@ -489,8 +739,23 @@ export default function CorrectionRequestsTab() {
       </Dialog>
 
       {/* Detail Dialog */}
-      <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: '#9c27b0', color: 'white' }}>
+      <Dialog 
+        open={detailDialogOpen} 
+        onClose={() => setDetailDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 20px 60px rgba(20, 184, 166, 0.25)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #14B8A6 0%, #0D9488 100%)', 
+          color: 'white',
+          borderRadius: '12px 12px 0 0',
+        }}>
           Request Details
         </DialogTitle>
         <DialogContent sx={{ mt: 2 }}>
@@ -552,14 +817,29 @@ export default function CorrectionRequestsTab() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>Close</Button>
+        <DialogActions sx={{ bgcolor: 'rgba(20, 184, 166, 0.03)' }}>
+          <Button onClick={() => setDetailDialogOpen(false)} sx={{ color: '#666' }}>Close</Button>
         </DialogActions>
       </Dialog>
 
       {/* Review Dialog */}
-      <Dialog open={reviewDialogOpen} onClose={() => setReviewDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ bgcolor: '#4caf50', color: 'white' }}>
+      <Dialog 
+        open={reviewDialogOpen} 
+        onClose={() => setReviewDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 20px 60px rgba(16, 185, 129, 0.25)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', 
+          color: 'white',
+          borderRadius: '12px 12px 0 0',
+        }}>
           <CheckCircle style={{ marginRight: 8, verticalAlign: 'middle' }} />
           Review Request
         </DialogTitle>
@@ -612,14 +892,19 @@ export default function CorrectionRequestsTab() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setReviewDialogOpen(false)}>Cancel</Button>
+        <DialogActions sx={{ p: 2, bgcolor: 'rgba(16, 185, 129, 0.03)' }}>
+          <Button onClick={() => setReviewDialogOpen(false)} sx={{ color: '#666' }}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleReview}
             sx={{
-              bgcolor: reviewForm.action === 'APPROVE' ? '#4caf50' : '#f44336',
-              '&:hover': { bgcolor: reviewForm.action === 'APPROVE' ? '#388e3c' : '#d32f2f' },
+              bgcolor: reviewForm.action === 'APPROVE' ? '#10B981' : '#EF4444',
+              '&:hover': { 
+                bgcolor: reviewForm.action === 'APPROVE' ? '#059669' : '#DC2626',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.2s ease',
+              borderRadius: 2,
             }}
           >
             {reviewForm.action === 'APPROVE' ? 'Approve' : 'Reject'}

@@ -21,9 +21,14 @@ export class AssignShiftDto {
   @ValidateIf((o) => !o.employeeId && !o.departmentId)
   positionId?: string;
 
-  @ApiProperty({ example: '507f1f77bcf86cd799439014', description: 'Shift ID to assign' })
+  @ApiProperty({ example: '507f1f77bcf86cd799439014', description: 'Shift Type ID to assign' })
   @IsMongoId()
-  shiftId: string;
+  shiftTypeId: string;
+
+  @ApiProperty({ example: '507f1f77bcf86cd799439014', description: 'Shift ID (optional)', required: false })
+  @IsMongoId()
+  @IsOptional()
+  shiftId?: string;
 
   @ApiProperty({ example: '507f1f77bcf86cd799439015', description: 'Schedule Rule ID', required: false })
   @IsMongoId()

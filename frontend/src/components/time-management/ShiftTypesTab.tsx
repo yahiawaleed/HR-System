@@ -178,168 +178,190 @@ export default function ShiftTypesTab() {
   return (
     <Paper
       elevation={0}
+      className="tm-fade-in-up"
       sx={{
-        borderRadius: 4,
+        borderRadius: 3,
+        border: '1px solid rgba(99, 102, 241, 0.15)',
+        bgcolor: 'white',
         overflow: 'hidden',
-        background: 'white',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          boxShadow: '0 8px 32px rgba(99, 102, 241, 0.12)',
+        },
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)',
-          p: 3,
-          color: 'white',
+          p: 2.5,
+          borderBottom: '1px solid rgba(99, 102, 241, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.04) 100%)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            className="tm-float"
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2.5,
+              background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 20px rgba(99, 102, 241, 0.35)',
+            }}
+          >
+            <Clock size={22} color="white" />
+          </Box>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', letterSpacing: '-0.01em' }}>
               Shift Types
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Manage different types of work shifts
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
+              Define work shift categories for your organization
             </Typography>
           </Box>
-          {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<Plus size={20} />}
-              onClick={handleOpenDialog}
-              sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.3)',
-                  transform: 'scale(1.05)',
-                },
-                transition: 'all 0.3s ease',
-                borderRadius: 2,
-                px: 3,
-              }}
-            >
-              Add Shift Type
-            </Button>
-          )}
         </Box>
+        {canCreate && (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<Plus size={16} />}
+            onClick={handleOpenDialog}
+            className="tm-btn"
+            sx={{
+              background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 2,
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                boxShadow: '0 6px 20px rgba(99, 102, 241, 0.45)',
+              },
+            }}
+          >
+            Add Shift Type
+          </Button>
+        )}
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 3 }}>
+      <Box>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-            <CircularProgress
-              sx={{
-                '& .MuiCircularProgress-circle': {
-                  stroke: 'url(#gradient)',
-                },
-              }}
-            />
-            <svg width={0} height={0}>
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2563EB" />
-                  <stop offset="100%" stopColor="#4F46E5" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 10, gap: 2 }}>
+            <Box sx={{ position: 'relative' }}>
+              <CircularProgress size={40} sx={{ color: '#6366F1' }} />
+              <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                <Clock size={16} color="#6366F1" />
+              </Box>
+            </Box>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>Loading shift types...</Typography>
           </Box>
         ) : (
-          <TableContainer>
+          <TableContainer className="tm-scrollbar">
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#F8FAFC' }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Status</TableCell>
-                  {(canEdit || canDelete) && <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Actions</TableCell>}
+                <TableRow sx={{ bgcolor: 'rgba(99, 102, 241, 0.03)' }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Status</TableCell>
+                  {(canEdit || canDelete) && <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Actions</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {shiftTypes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={(canEdit || canDelete) ? 3 : 2} align="center" sx={{ py: 8 }}>
-                      <Clock size={48} color="#CBD5E1" style={{ marginBottom: 16 }} />
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
-                        No shift types found
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        {canCreate ? 'Create one to get started.' : 'No shift types available.'}
-                      </Typography>
+                    <TableCell colSpan={(canEdit || canDelete) ? 3 : 2} sx={{ py: 10, textAlign: 'center' }}>
+                      <Box className="tm-empty-state">
+                        <Box className="tm-empty-state-icon" sx={{ mb: 2 }}>
+                          <Clock size={48} color="#CBD5E1" />
+                        </Box>
+                        <Typography sx={{ color: '#64748B', fontWeight: 600, mb: 0.5 }}>
+                          No shift types found
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                          {canCreate ? 'Create your first shift type to get started' : 'No shift types available'}
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  shiftTypes.map((shiftType) => (
-                    <TableRow
-                      key={shiftType._id}
-                      sx={{
-                        '&:hover': {
-                          bgcolor: '#F1F5F9',
-                        },
-                        transition: 'all 0.2s ease',
+                  shiftTypes.map((shiftType, index) => (
+                    <TableRow 
+                      key={shiftType._id} 
+                      className="tm-table-row tm-table-highlight"
+                      sx={{ 
+                        '&:hover': { bgcolor: 'rgba(99, 102, 241, 0.04)' },
+                        animation: 'fadeInUp 0.4s ease-out',
+                        animationDelay: `${index * 60}ms`,
+                        animationFillMode: 'both',
                       }}
                     >
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Paper
-                            elevation={0}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
                             sx={{
-                              p: 1,
-                              background: 'linear-gradient(135deg, #DBEAFE 0%, #E0E7FF 100%)',
-                              borderRadius: 2,
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              bgcolor: shiftType.active ? '#10B981' : '#94A3B8',
+                              boxShadow: shiftType.active ? '0 0 10px rgba(16, 185, 129, 0.5)' : 'none',
+                              transition: 'all 0.3s ease',
                             }}
-                          >
-                            <Clock size={16} color="#2563EB" />
-                          </Paper>
-                          <Typography sx={{ fontWeight: 600 }}>{shiftType.name}</Typography>
+                          />
+                          <Typography sx={{ fontWeight: 600, color: '#1E293B' }}>{shiftType.name}</Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
                         <Chip
                           label={shiftType.active ? 'Active' : 'Inactive'}
                           size="small"
+                          className="tm-chip"
                           sx={{
-                            background: shiftType.active
-                              ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                              : '#E2E8F0',
-                            color: shiftType.active ? 'white' : '#64748B',
+                            bgcolor: shiftType.active ? '#DCFCE7' : '#F1F5F9',
+                            color: shiftType.active ? '#059669' : '#64748B',
                             fontWeight: 600,
-                            borderRadius: 2,
+                            fontSize: '0.75rem',
+                            border: shiftType.active ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid #E2E8F0',
                           }}
                         />
                       </TableCell>
                       {(canEdit || canDelete) && (
                         <TableCell align="right">
-                          {canEdit && (
-                            <IconButton
-                              onClick={() => handleEdit(shiftType)}
-                              sx={{
-                                color: '#2563EB',
-                                '&:hover': {
-                                  bgcolor: '#DBEAFE',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                                mr: 1,
-                              }}
-                            >
-                              <Edit size={18} />
-                            </IconButton>
-                          )}
-                          {canDelete && (
-                            <IconButton
-                              onClick={() => handleDelete(shiftType._id)}
-                              sx={{
-                                color: '#DC2626',
-                                '&:hover': {
-                                  bgcolor: '#FEE2E2',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              <Trash2 size={18} />
-                            </IconButton>
-                          )}
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                            {canEdit && (
+                              <IconButton 
+                                size="small" 
+                                onClick={() => handleEdit(shiftType)} 
+                                className="tm-icon-btn"
+                                sx={{ 
+                                  color: '#64748B',
+                                  '&:hover': { color: '#6366F1', bgcolor: 'rgba(99, 102, 241, 0.1)' },
+                                }}
+                              >
+                                <Edit size={16} />
+                              </IconButton>
+                            )}
+                            {canDelete && (
+                              <IconButton 
+                                size="small" 
+                                onClick={() => handleDelete(shiftType._id)} 
+                                className="tm-icon-btn"
+                                sx={{ 
+                                  color: '#64748B',
+                                  '&:hover': { color: '#EF4444', bgcolor: 'rgba(239, 68, 68, 0.1)' },
+                                }}
+                              >
+                                <Trash2 size={16} />
+                              </IconButton>
+                            )}
+                          </Box>
                         </TableCell>
                       )}
                     </TableRow>
@@ -358,96 +380,87 @@ export default function ShiftTypesTab() {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 40px -10px rgba(37, 99, 235, 0.3)',
+          className: 'tm-dialog',
+          sx: { 
+            borderRadius: 3,
+            boxShadow: '0 25px 80px rgba(99, 102, 241, 0.25)',
           },
         }}
       >
-        <DialogTitle
-          sx={{
-            background: 'linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '1.5rem',
-          }}
-        >
+        <DialogTitle sx={{ 
+          fontWeight: 700, 
+          pb: 1,
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
+          borderBottom: '1px solid rgba(99, 102, 241, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+        }}>
+          <Box sx={{
+            width: 36,
+            height: 36,
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Clock size={18} color="white" />
+          </Box>
           {editingShiftType ? 'Edit' : 'Create'} Shift Type
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <TextField
-                label="Shift Type Name"
-                placeholder="e.g., Normal Day Shift (9-5)"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                fullWidth
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#2563EB',
-                      borderWidth: 2,
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#2563EB',
-                  },
-                }}
-              />
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  bgcolor: '#F8FAFC',
-                  borderRadius: 2,
-                }}
-              >
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.active}
-                      onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: '#10B981',
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          bgcolor: '#10B981',
-                        },
-                      }}
-                    />
-                  }
-                  label={<Typography sx={{ fontWeight: 600 }}>Active Status</Typography>}
-                />
-              </Paper>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ p: 3, gap: 1 }}>
-            <Button
-              onClick={() => setDialogOpen(false)}
-              sx={{
-                color: '#64748B',
-                '&:hover': {
-                  bgcolor: '#F1F5F9',
+            <TextField
+              label="Shift Type Name"
+              placeholder="e.g., Morning Shift, Night Shift"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              fullWidth
+              sx={{ 
+                mb: 2.5,
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': { borderColor: '#6366F1' },
+                  '&.Mui-focused fieldset': { borderColor: '#6366F1' },
                 },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#6366F1' },
               }}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.active}
+                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': { color: '#10B981' },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#10B981' },
+                  }}
+                />
+              }
+              label={<Typography sx={{ fontWeight: 500 }}>Active</Typography>}
+            />
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5, pt: 0, gap: 1 }}>
+            <Button 
+              onClick={() => setDialogOpen(false)} 
+              sx={{ textTransform: 'none', color: '#64748B', fontWeight: 500 }}
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                background: 'linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%)',
-                  transform: 'scale(1.02)',
-                },
-                transition: 'all 0.3s ease',
-                px: 4,
+            <Button 
+              type="submit" 
+              variant="contained" 
+              className="tm-btn"
+              sx={{ 
+                textTransform: 'none',
+                background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+                px: 3,
                 borderRadius: 2,
+                fontWeight: 600,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                },
               }}
             >
               {editingShiftType ? 'Update' : 'Create'}

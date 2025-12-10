@@ -32,8 +32,11 @@ import {
   InputLabel,
   Tabs,
   Tab,
+  LinearProgress,
+  Tooltip,
+  Avatar,
 } from '@mui/material';
-import { Clock, LogIn, LogOut, Calendar, Timer, AlertTriangle, Edit, Eye, Users, UserCheck, UserX, Coffee, History } from 'lucide-react';
+import { Clock, LogIn, LogOut, Calendar, Timer, AlertTriangle, Edit, Eye, Users, UserCheck, UserX, Coffee, History, TrendingUp, Zap, Target, Award } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Punch {
@@ -126,6 +129,17 @@ export default function AttendanceTab() {
 
       const headers = { Authorization: `Bearer ${token}` };
 
+      // Helper function to safely parse JSON responses
+      const safeJsonParse = async (response: Response) => {
+        const text = await response.text();
+        if (!text || text.trim() === '') return null;
+        try {
+          return JSON.parse(text);
+        } catch {
+          return null;
+        }
+      };
+
       const [recordsRes, todayRes, policyRes, employeesRes] = await Promise.all([
         fetch(`${API_BASE_URL}/time-management/attendance`, { headers }),
         fetch(`${API_BASE_URL}/time-management/attendance/my-today`, { headers }),
@@ -134,7 +148,7 @@ export default function AttendanceTab() {
       ]);
 
       if (recordsRes.ok) {
-        const data = await recordsRes.json();
+        const data = await safeJsonParse(recordsRes);
         const allRecords = Array.isArray(data) ? data : [];
         setRecords(allRecords);
 
@@ -152,17 +166,17 @@ export default function AttendanceTab() {
       }
 
       if (todayRes.ok) {
-        const data = await todayRes.json();
-        setTodayRecord(data);
+        const data = await safeJsonParse(todayRes);
+        if (data) setTodayRecord(data);
       }
 
       if (policyRes.ok) {
-        const data = await policyRes.json();
-        setPunchPolicy(data.value || 'MULTIPLE');
+        const data = await safeJsonParse(policyRes);
+        if (data) setPunchPolicy(data.value || 'MULTIPLE');
       }
 
       if (employeesRes.ok) {
-        const data = await employeesRes.json();
+        const data = await safeJsonParse(employeesRes);
         const employeesList = data?.data || (Array.isArray(data) ? data : []);
         setEmployees(employeesList);
       }
@@ -193,11 +207,22 @@ export default function AttendanceTab() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to clock in');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to clock in';
+        try {
+          if (errorText) {
+            const error = JSON.parse(errorText);
+            errorMessage = error.message || errorMessage;
+          }
+        } catch { }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: { message?: string } = {};
+      try {
+        if (responseText) data = JSON.parse(responseText);
+      } catch { }
       toast.success(data.message || 'Clocked in successfully!');
       fetchData();
     } catch (error: any) {
@@ -224,11 +249,22 @@ export default function AttendanceTab() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to clock out');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to clock out';
+        try {
+          if (errorText) {
+            const error = JSON.parse(errorText);
+            errorMessage = error.message || errorMessage;
+          }
+        } catch { }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: { message?: string } = {};
+      try {
+        if (responseText) data = JSON.parse(responseText);
+      } catch { }
       toast.success(data.message || 'Clocked out successfully!');
       fetchData();
     } catch (error: any) {
@@ -256,8 +292,15 @@ export default function AttendanceTab() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to correct attendance');
+        const errorText = await response.text();
+        let errorMessage = 'Failed to correct attendance';
+        try {
+          if (errorText) {
+            const error = JSON.parse(errorText);
+            errorMessage = error.message || errorMessage;
+          }
+        } catch { }
+        throw new Error(errorMessage);
       }
 
       toast.success('Attendance corrected successfully!');
@@ -350,38 +393,62 @@ export default function AttendanceTab() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <CircularProgress sx={{ color: '#9c27b0' }} />
+      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: 400, gap: 2 }}>
+        <Box sx={{ position: 'relative' }}>
+          <CircularProgress size={48} sx={{ color: '#EC4899' }} />
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}>
+            <Clock size={20} color="#EC4899" />
+          </Box>
+        </Box>
+        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>Loading attendance data...</Typography>
       </Box>
     );
   }
 
   return (
-    <Box>
+    <Box className="tm-fade-in">
       {/* Tab Navigation */}
-      <Paper elevation={0} sx={{ borderRadius: 3, mb: 3, overflow: 'hidden' }}>
+      <Paper elevation={0} sx={{
+        borderRadius: 3,
+        mb: 3,
+        overflow: 'hidden',
+        border: '1px solid rgba(236, 72, 153, 0.2)',
+        boxShadow: '0 2px 12px rgba(236, 72, 153, 0.08)',
+      }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           sx={{
-            bgcolor: '#f5f5f5',
+            bgcolor: 'rgba(236, 72, 153, 0.04)',
             '& .MuiTab-root': {
               fontWeight: 600,
               fontSize: '0.95rem',
               textTransform: 'none',
-              minHeight: 56,
+              minHeight: 60,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                bgcolor: 'rgba(236, 72, 153, 0.06)',
+              },
             },
             '& .Mui-selected': {
-              color: '#9c27b0 !important',
+              color: '#EC4899 !important',
+              bgcolor: 'rgba(236, 72, 153, 0.08) !important',
             },
             '& .MuiTabs-indicator': {
-              bgcolor: '#9c27b0',
+              background: 'linear-gradient(90deg, #EC4899 0%, #F472B6 100%)',
               height: 3,
+              borderRadius: '3px 3px 0 0',
+              boxShadow: '0 -2px 10px rgba(236, 72, 153, 0.4)',
             },
           }}
         >
           <Tab
-            icon={<Clock size={18} />}
+            icon={<Zap size={18} />}
             iconPosition="start"
             label="Today"
           />
@@ -400,194 +467,246 @@ export default function AttendanceTab() {
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              p: 0,
               mb: 3,
-              background: 'linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)',
-              color: 'white',
               borderRadius: 3,
+              overflow: 'hidden',
+              border: '1px solid rgba(236, 72, 153, 0.15)',
             }}
           >
-            <Grid container spacing={3} alignItems="center">
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-                  <Clock style={{ marginRight: 8, verticalAlign: 'middle' }} />
-                  Today's Attendance
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </Typography>
-
-                {todayRecord && todayRecord.punches.length > 0 ? (
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Punches today: {todayRecord.punches.length}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      First In: {formatTime(todayRecord.punches[0].time)}
-                    </Typography>
-                    {todayRecord.punches.length > 1 && (
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        Last: {todayRecord.punches[todayRecord.punches.length - 1].type} at {formatTime(todayRecord.punches[todayRecord.punches.length - 1].time)}
+            <Box sx={{
+              background: 'linear-gradient(135deg, #EC4899 0%, #F472B6 100%)',
+              p: 3,
+              position: 'relative',
+            }}>
+              <Grid container spacing={2} alignItems="center">
+                <Grid size={{ xs: 12, md: 7 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
+                    <Box sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Clock size={22} color="white" />
+                    </Box>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
+                        Today's Attendance
                       </Typography>
-                    )}
-                    <Typography variant="body2" sx={{ opacity: 0.9, mt: 1 }}>
-                      Total Work Time: {formatWorkTime(todayRecord.totalWorkMinutes)}
-                    </Typography>
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)' }}>
+                        {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                      </Typography>
+                    </Box>
                   </Box>
-                ) : (
-                  <Typography variant="body2" sx={{ mt: 2, opacity: 0.9 }}>
-                    No punches recorded yet today
-                  </Typography>
-                )}
-              </Grid>
 
-              <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<LogIn />}
-                  onClick={handleClockIn}
-                  disabled={getLastPunchType() === 'IN'}
-                  sx={{
-                    bgcolor: 'white',
-                    color: '#9c27b0',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' },
-                    '&:disabled': { bgcolor: 'rgba(255,255,255,0.5)', color: 'rgba(0,0,0,0.3)' },
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 600,
-                  }}
-                >
-                  Clock In
-                </Button>
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<LogOut />}
-                  onClick={handleClockOut}
-                  disabled={!todayRecord || todayRecord.punches.length === 0 || getLastPunchType() === 'OUT'}
-                  sx={{
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    color: 'white',
-                    border: '2px solid white',
-                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                    '&:disabled': { bgcolor: 'transparent', color: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.3)' },
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 600,
-                  }}
-                >
-                  Clock Out
-                </Button>
+                  {todayRecord && todayRecord.punches.length > 0 ? (
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 1.5, px: 2, py: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.65rem' }}>Punches</Typography>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>{todayRecord.punches.length}</Typography>
+                      </Box>
+                      <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 1.5, px: 2, py: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.65rem' }}>First In</Typography>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>{formatTime(todayRecord.punches[0].time)}</Typography>
+                      </Box>
+                      <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 1.5, px: 2, py: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.65rem' }}>Work Time</Typography>
+                        <Typography sx={{ color: 'white', fontWeight: 600 }}>{formatWorkTime(todayRecord.totalWorkMinutes)}</Typography>
+                      </Box>
+                      {todayRecord.punches.length > 1 && (
+                        <Box sx={{ bgcolor: 'rgba(255,255,255,0.15)', borderRadius: 1.5, px: 2, py: 1 }}>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.65rem' }}>Last {todayRecord.punches[todayRecord.punches.length - 1].type}</Typography>
+                          <Typography sx={{ color: 'white', fontWeight: 600 }}>{formatTime(todayRecord.punches[todayRecord.punches.length - 1].time)}</Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)', mt: 1 }}>
+                      No punches yet. Clock in to start your day.
+                    </Typography>
+                  )}
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 5 }} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, gap: 1.5, flexWrap: 'wrap' }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<LogIn size={18} />}
+                    onClick={handleClockIn}
+                    disabled={getLastPunchType() === 'IN'}
+                    sx={{
+                      bgcolor: 'white',
+                      color: '#EC4899',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' },
+                      '&:disabled': { bgcolor: 'rgba(255,255,255,0.4)', color: 'rgba(0,0,0,0.25)' },
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                    }}
+                  >
+                    Clock In
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<LogOut size={18} />}
+                    onClick={handleClockOut}
+                    disabled={!todayRecord || todayRecord.punches.length === 0 || getLastPunchType() === 'OUT'}
+                    sx={{
+                      color: 'white',
+                      borderColor: 'rgba(255,255,255,0.5)',
+                      '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' },
+                      '&:disabled': { color: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.2)' },
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                    }}
+                  >
+                    Clock Out
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
 
             {punchPolicy === 'FIRST_LAST' && (
-              <Alert severity="info" sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.15)', color: 'white', '& .MuiAlert-icon': { color: 'white' } }}>
-                Punch Policy: FIRST_LAST - Only the first clock-in and last clock-out of the day count.
+              <Alert
+                severity="info"
+                icon={<Target size={18} />}
+                sx={{
+                  borderRadius: 0,
+                  bgcolor: 'rgba(236, 72, 153, 0.08)',
+                  color: '#EC4899',
+                  '& .MuiAlert-icon': { color: '#EC4899' },
+                  borderTop: '1px solid rgba(236, 72, 153, 0.2)',
+                }}
+              >
+                <strong>Punch Policy: FIRST_LAST</strong> — Only the first clock-in and last clock-out of the day count.
               </Alert>
             )}
           </Paper>
 
           {/* Today's Attendance Schedule - Only for managers and above */}
           {(canViewAllRecords || canViewTeamRecords) && (
-            <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+            <Paper elevation={0} sx={{
+              borderRadius: 2.5,
+              overflow: 'hidden',
+              border: '1px solid rgba(236, 72, 153, 0.12)',
+            }}>
               <Box sx={{
                 p: 2,
-                borderBottom: '1px solid #e0e0e0',
+                borderBottom: '1px solid rgba(236, 72, 153, 0.08)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                gap: 2
+                gap: 1.5,
+                bgcolor: 'rgba(236, 72, 153, 0.03)',
               }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#333' }}>
-                  <Users style={{ marginRight: 8, verticalAlign: 'middle', color: '#9c27b0' }} />
-                  Who's Working Today
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 1.5,
+                    bgcolor: '#EC4899',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Users size={18} color="white" />
+                  </Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1E293B' }}>
+                    Who's Working Today
+                  </Typography>
+                </Box>
 
-                {/* Statistics Cards */}
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                {/* Statistics Chips */}
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   <Chip
-                    icon={<UserCheck size={16} />}
+                    size="small"
+                    icon={<UserCheck size={14} />}
                     label={`Working: ${checkedInCount}`}
                     onClick={() => setScheduleFilter(scheduleFilter === 'checked-in' ? 'all' : 'checked-in')}
                     sx={{
-                      bgcolor: scheduleFilter === 'checked-in' ? '#4caf50' : '#e8f5e9',
-                      color: scheduleFilter === 'checked-in' ? 'white' : '#2e7d32',
+                      bgcolor: scheduleFilter === 'checked-in' ? '#10B981' : '#DCFCE7',
+                      color: scheduleFilter === 'checked-in' ? 'white' : '#059669',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      '&:hover': { bgcolor: scheduleFilter === 'checked-in' ? '#388e3c' : '#c8e6c9' }
                     }}
                   />
                   <Chip
-                    icon={<LogOut size={16} />}
+                    size="small"
+                    icon={<LogOut size={14} />}
                     label={`Left: ${checkedOutCount}`}
                     onClick={() => setScheduleFilter(scheduleFilter === 'checked-out' ? 'all' : 'checked-out')}
                     sx={{
-                      bgcolor: scheduleFilter === 'checked-out' ? '#2196f3' : '#e3f2fd',
-                      color: scheduleFilter === 'checked-out' ? 'white' : '#1565c0',
+                      bgcolor: scheduleFilter === 'checked-out' ? '#3B82F6' : '#DBEAFE',
+                      color: scheduleFilter === 'checked-out' ? 'white' : '#2563EB',
                       fontWeight: 600,
                       cursor: 'pointer',
-                      '&:hover': { bgcolor: scheduleFilter === 'checked-out' ? '#1976d2' : '#bbdefb' }
                     }}
                   />
                 </Box>
               </Box>
 
-              <TableContainer sx={{ maxHeight: 400 }}>
+              <TableContainer sx={{ maxHeight: 450 }} className="tm-scrollbar">
                 <Table stickyHeader size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Employee</TableCell>
-                      <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Status</TableCell>
-                      <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Check In</TableCell>
-                      <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Check Out</TableCell>
-                      <TableCell sx={{ fontWeight: 600, bgcolor: '#f5f5f5' }}>Work Time</TableCell>
+                      <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Employee</TableCell>
+                      <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Check In</TableCell>
+                      <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Check Out</TableCell>
+                      <TableCell sx={{ fontWeight: 600, bgcolor: '#F8FAFC', color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Work Time</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {filteredSchedule.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} align="center" sx={{ py: 4, color: '#666' }}>
-                          No attendance records for today yet
+                        <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                          <Box className="tm-empty-state">
+                            <Users size={48} color="#CBD5E1" style={{ marginBottom: 12 }} className="tm-empty-state-icon" />
+                            <Typography sx={{ fontWeight: 600, color: '#64748B' }}>
+                              No attendance records for today yet
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#94A3B8', mt: 0.5 }}>
+                              Records will appear as employees clock in
+                            </Typography>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredSchedule.map((item) => (
                         <TableRow
                           key={item.employee._id}
-                          hover
                           sx={{
-                            bgcolor: item.status === 'checked-in' ? 'rgba(76, 175, 80, 0.05)' :
-                              item.status === 'checked-out' ? 'rgba(33, 150, 243, 0.05)' :
-                                'rgba(255, 152, 0, 0.05)'
+                            '&:hover': { bgcolor: '#F8FAFC' },
                           }}
                         >
                           <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                              <Avatar
                                 sx={{
                                   width: 32,
                                   height: 32,
-                                  borderRadius: '50%',
-                                  bgcolor: item.status === 'checked-in' ? '#4caf50' :
-                                    item.status === 'checked-out' ? '#2196f3' : '#ff9800',
-                                  color: 'white',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
                                   fontSize: '0.75rem',
                                   fontWeight: 600,
+                                  bgcolor: item.status === 'checked-in' ? '#10B981'
+                                    : item.status === 'checked-out' ? '#3B82F6' : '#F59E0B',
                                 }}
                               >
                                 {item.employee.firstName?.charAt(0)}{item.employee.lastName?.charAt(0)}
-                              </Box>
+                              </Avatar>
                               <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }}>
                                   {item.employee.fullName || `${item.employee.firstName} ${item.employee.lastName}`}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: '#666' }}>
+                                <Typography variant="caption" sx={{ color: '#94A3B8' }}>
                                   {item.employee.employeeNumber}
                                 </Typography>
                               </Box>
@@ -607,43 +726,37 @@ export default function AttendanceTab() {
                                     'Not Arrived'
                               }
                               sx={{
-                                bgcolor: item.status === 'checked-in' ? '#e8f5e9' :
-                                  item.status === 'checked-out' ? '#e3f2fd' : '#fff3e0',
-                                color: item.status === 'checked-in' ? '#2e7d32' :
-                                  item.status === 'checked-out' ? '#1565c0' : '#e65100',
-                                fontWeight: 500,
+                                bgcolor: item.status === 'checked-in' ? '#DCFCE7' :
+                                  item.status === 'checked-out' ? '#DBEAFE' : '#FEF3C7',
+                                color: item.status === 'checked-in' ? '#059669' :
+                                  item.status === 'checked-out' ? '#2563EB' : '#D97706',
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
                               }}
                             />
                           </TableCell>
                           <TableCell>
                             {item.checkInTime ? (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <LogIn size={14} color="#4caf50" />
-                                <Typography variant="body2">{formatTime(item.checkInTime)}</Typography>
-                              </Box>
+                              <Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>
+                                {formatTime(item.checkInTime)}
+                              </Typography>
                             ) : (
                               <Typography variant="body2" color="text.secondary">--:--</Typography>
                             )}
                           </TableCell>
                           <TableCell>
                             {item.checkOutTime ? (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <LogOut size={14} color="#2196f3" />
-                                <Typography variant="body2">{formatTime(item.checkOutTime)}</Typography>
-                              </Box>
+                              <Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>
+                                {formatTime(item.checkOutTime)}
+                              </Typography>
                             ) : (
                               <Typography variant="body2" color="text.secondary">--:--</Typography>
                             )}
                           </TableCell>
                           <TableCell>
-                            {item.totalMinutes > 0 ? (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <Timer size={14} color="#9c27b0" />
-                                <Typography variant="body2">{formatWorkTime(item.totalMinutes)}</Typography>
-                              </Box>
-                            ) : (
-                              <Typography variant="body2" color="text.secondary">0h 0m</Typography>
-                            )}
+                            <Typography variant="body2" sx={{ fontWeight: 500, color: '#1E293B' }}>
+                              {formatWorkTime(item.totalMinutes)}
+                            </Typography>
                           </TableCell>
                         </TableRow>
                       ))

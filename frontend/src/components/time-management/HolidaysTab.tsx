@@ -208,21 +208,23 @@ export default function HolidaysTab() {
   };
 
   const getTypeChip = (type: string) => {
-    const typeStyles: Record<string, { bg: string; color: string }> = {
-      NATIONAL: { bg: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)', color: 'white' },
-      ORGANIZATIONAL: { bg: 'linear-gradient(135deg, #9333EA 0%, #A855F7 100%)', color: 'white' },
-      WEEKLY: { bg: 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)', color: 'white' },
+    const typeStyles: Record<string, { bg: string; color: string; gradient: string; border: string }> = {
+      NATIONAL: { bg: '#DBEAFE', color: '#2563EB', gradient: 'linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)', border: 'rgba(59, 130, 246, 0.2)' },
+      ORGANIZATIONAL: { bg: '#EDE9FE', color: '#7C3AED', gradient: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)', border: 'rgba(139, 92, 246, 0.2)' },
+      WEEKLY: { bg: '#CCFBF1', color: '#0D9488', gradient: 'linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%)', border: 'rgba(20, 184, 166, 0.2)' },
     };
     const style = typeStyles[type] || typeStyles.NATIONAL;
     return (
       <Chip
         label={type}
         size="small"
+        className="tm-chip"
         sx={{
-          background: style.bg,
+          bgcolor: style.bg,
           color: style.color,
           fontWeight: 600,
-          borderRadius: 2,
+          fontSize: '0.7rem',
+          border: `1px solid ${style.border}`,
         }}
       />
     );
@@ -231,182 +233,203 @@ export default function HolidaysTab() {
   return (
     <Paper
       elevation={0}
+      className="tm-fade-in-up"
       sx={{
-        borderRadius: 4,
+        borderRadius: 3,
         overflow: 'hidden',
         background: 'white',
+        border: '1px solid rgba(249, 115, 22, 0.15)',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          boxShadow: '0 8px 32px rgba(249, 115, 22, 0.12)',
+        },
       }}
     >
-      {/* Header - Orange/Red Theme */}
+      {/* Header */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #EA580C 0%, #DC2626 100%)',
-          p: 3,
-          color: 'white',
+          p: 2.5,
+          borderBottom: '1px solid rgba(249, 115, 22, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.06) 0%, rgba(234, 88, 12, 0.03) 100%)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            className="tm-float"
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: 2.5,
+              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 20px rgba(249, 115, 22, 0.4)',
+            }}
+          >
+            <CalendarDays size={22} color="white" />
+          </Box>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#1E293B', letterSpacing: '-0.01em' }}>
               Holidays
             </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Manage national, organizational, and weekly holidays
+            <Typography variant="caption" sx={{ color: '#64748B' }}>
+              Manage company-wide holidays and special days
             </Typography>
           </Box>
-          {canCreate && (
-            <Button
-              variant="contained"
-              startIcon={<Plus size={20} />}
-              onClick={handleOpenDialog}
-              sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.3)',
-                  transform: 'scale(1.05)',
-                },
-                transition: 'all 0.3s ease',
-                borderRadius: 2,
-                px: 3,
-              }}
-            >
-              Add Holiday
-            </Button>
-          )}
         </Box>
+        {canCreate && (
+          <Button
+            variant="contained"
+            startIcon={<Plus size={18} />}
+            onClick={handleOpenDialog}
+            className="tm-btn"
+            sx={{
+              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 2.5,
+              py: 1,
+              borderRadius: 2,
+              boxShadow: '0 4px 14px rgba(249, 115, 22, 0.35)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)',
+                boxShadow: '0 6px 20px rgba(249, 115, 22, 0.45)',
+              },
+            }}
+          >
+            Add Holiday
+          </Button>
+        )}
       </Box>
 
       {/* Content */}
-      <Box sx={{ p: 3 }}>
+      <Box>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-            <CircularProgress
-              sx={{
-                '& .MuiCircularProgress-circle': {
-                  stroke: 'url(#gradientOrange)',
-                },
-              }}
-            />
-            <svg width={0} height={0}>
-              <defs>
-                <linearGradient id="gradientOrange" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#EA580C" />
-                  <stop offset="100%" stopColor="#DC2626" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 10, gap: 2 }}>
+            <Box sx={{ position: 'relative' }}>
+              <CircularProgress size={40} sx={{ color: '#F97316' }} />
+              <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                <CalendarDays size={16} color="#F97316" />
+              </Box>
+            </Box>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>Loading holidays...</Typography>
           </Box>
         ) : (
-          <TableContainer>
+          <TableContainer className="tm-scrollbar">
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: '#FFF7ED' }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Type</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Start Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>End Date</TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Status</TableCell>
-                  {(canEdit || canDelete) && <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Actions</TableCell>}
+                <TableRow sx={{ bgcolor: 'rgba(249, 115, 22, 0.03)' }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Type</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Start Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>End Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Status</TableCell>
+                  {(canEdit || canDelete) && <TableCell align="right" sx={{ fontWeight: 600, color: '#475569', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', py: 1.75 }}>Actions</TableCell>}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {holidays.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={(canEdit || canDelete) ? 6 : 5} align="center" sx={{ py: 8 }}>
-                      <CalendarDays size={48} color="#FDBA74" style={{ marginBottom: 16 }} />
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
-                        No holidays found
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: '#94A3B8' }}>
-                        {canCreate ? 'Create one to get started.' : 'No holidays available.'}
-                      </Typography>
+                    <TableCell colSpan={(canEdit || canDelete) ? 6 : 5} align="center" sx={{ py: 10 }}>
+                      <Box className="tm-empty-state">
+                        <Box className="tm-empty-state-icon" sx={{ mb: 2 }}>
+                          <CalendarDays size={48} color="#CBD5E1" />
+                        </Box>
+                        <Typography sx={{ fontWeight: 600, color: '#64748B', mb: 0.5 }}>
+                          No holidays found
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#94A3B8' }}>
+                          {canCreate ? 'Add your first holiday to get started' : 'No holidays available'}
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  holidays.map((holiday) => (
+                  holidays.map((holiday, index) => (
                     <TableRow
                       key={holiday._id}
+                      className="tm-table-row tm-table-highlight"
                       sx={{
-                        '&:hover': {
-                          bgcolor: '#FFF7ED',
-                        },
-                        transition: 'all 0.2s ease',
+                        '&:hover': { bgcolor: 'rgba(249, 115, 22, 0.04)' },
+                        animation: 'fadeInUp 0.4s ease-out',
+                        animationDelay: `${index * 60}ms`,
+                        animationFillMode: 'both',
                       }}
                     >
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Paper
-                            elevation={0}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box
                             sx={{
-                              p: 1,
-                              background: 'linear-gradient(135deg, #FED7AA 0%, #FDBA74 100%)',
-                              borderRadius: 2,
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              bgcolor: holiday.active ? '#F97316' : '#94A3B8',
+                              boxShadow: holiday.active ? '0 0 10px rgba(249, 115, 22, 0.5)' : 'none',
+                              transition: 'all 0.3s ease',
                             }}
-                          >
-                            <Calendar size={16} color="#EA580C" />
-                          </Paper>
-                          <Typography sx={{ fontWeight: 600 }}>{holiday.name}</Typography>
+                          />
+                          <Typography sx={{ fontWeight: 600, color: '#1E293B' }}>{holiday.name}</Typography>
                         </Box>
                       </TableCell>
                       <TableCell>{getTypeChip(holiday.type)}</TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {new Date(holiday.startDate).toLocaleDateString()}
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
+                          {new Date(holiday.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {holiday.endDate ? new Date(holiday.endDate).toLocaleDateString() : '—'}
+                        <Typography variant="body2" sx={{ color: '#64748B', fontWeight: 500 }}>
+                          {holiday.endDate ? new Date(holiday.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Chip
                           label={holiday.active ? 'Active' : 'Inactive'}
                           size="small"
+                          className="tm-chip"
                           sx={{
-                            background: holiday.active
-                              ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                              : '#E2E8F0',
-                            color: holiday.active ? 'white' : '#64748B',
+                            bgcolor: holiday.active ? '#DCFCE7' : '#F1F5F9',
+                            color: holiday.active ? '#059669' : '#64748B',
                             fontWeight: 600,
-                            borderRadius: 2,
+                            fontSize: '0.75rem',
+                            border: holiday.active ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid #E2E8F0',
                           }}
                         />
                       </TableCell>
                       {(canEdit || canDelete) && (
                         <TableCell align="right">
-                          {canEdit && (
-                            <IconButton
-                              onClick={() => handleEdit(holiday)}
-                              sx={{
-                                color: '#EA580C',
-                                '&:hover': {
-                                  bgcolor: '#FED7AA',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                                mr: 1,
-                              }}
-                            >
-                              <Edit size={18} />
-                            </IconButton>
-                          )}
-                          {canDelete && (
-                            <IconButton
-                              onClick={() => handleDelete(holiday._id)}
-                              sx={{
-                                color: '#DC2626',
-                                '&:hover': {
-                                  bgcolor: '#FEE2E2',
-                                  transform: 'scale(1.1)',
-                                },
-                                transition: 'all 0.2s ease',
-                              }}
-                            >
-                              <Trash2 size={18} />
-                            </IconButton>
-                          )}
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                            {canEdit && (
+                              <IconButton
+                                onClick={() => handleEdit(holiday)}
+                                size="small"
+                                className="tm-icon-btn"
+                                sx={{
+                                  color: '#64748B',
+                                  '&:hover': { bgcolor: 'rgba(249, 115, 22, 0.1)', color: '#F97316' },
+                                }}
+                              >
+                                <Edit size={16} />
+                              </IconButton>
+                            )}
+                            {canDelete && (
+                              <IconButton
+                                onClick={() => handleDelete(holiday._id)}
+                                size="small"
+                                className="tm-icon-btn"
+                                sx={{
+                                  color: '#64748B',
+                                  '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' },
+                                }}
+                              >
+                                <Trash2 size={16} />
+                              </IconButton>
+                            )}
+                          </Box>
                         </TableCell>
                       )}
                     </TableRow>
@@ -425,25 +448,23 @@ export default function HolidaysTab() {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: '0 20px 40px -10px rgba(234, 88, 12, 0.3)',
-          },
+          className: 'tm-dialog',
+          sx: { borderRadius: 3 },
         }}
       >
         <DialogTitle
           sx={{
-            background: 'linear-gradient(135deg, #EA580C 0%, #DC2626 100%)',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: '1.5rem',
+            fontWeight: 600,
+            pb: 1,
+            background: 'linear-gradient(135deg, #FFF7ED 0%, #F8FAFC 100%)',
+            borderBottom: '1px solid #E2E8F0',
           }}
         >
           {editingHoliday ? 'Edit' : 'Create'} Holiday
         </DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent sx={{ pt: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
               <Box sx={{ display: 'flex', gap: 2 }}>
                 <TextField
                   label="Holiday Name"
@@ -452,30 +473,13 @@ export default function HolidaysTab() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                   fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#EA580C',
-                        borderWidth: 2,
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#EA580C',
-                    },
-                  }}
                 />
                 <FormControl fullWidth>
-                  <InputLabel sx={{ '&.Mui-focused': { color: '#EA580C' } }}>Type</InputLabel>
+                  <InputLabel>Type</InputLabel>
                   <Select
                     value={formData.type}
                     label="Type"
                     onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                    sx={{
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#EA580C',
-                        borderWidth: 2,
-                      },
-                    }}
                   >
                     <MenuItem value="NATIONAL">National</MenuItem>
                     <MenuItem value="ORGANIZATIONAL">Organizational</MenuItem>
@@ -492,17 +496,6 @@ export default function HolidaysTab() {
                   required
                   fullWidth
                   slotProps={{ inputLabel: { shrink: true } }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#EA580C',
-                        borderWidth: 2,
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#EA580C',
-                    },
-                  }}
                 />
                 <TextField
                   label="End Date (Optional)"
@@ -512,71 +505,39 @@ export default function HolidaysTab() {
                   fullWidth
                   slotProps={{ inputLabel: { shrink: true } }}
                   helperText="Leave empty for single-day"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#EA580C',
-                        borderWidth: 2,
-                      },
-                    },
-                    '& .MuiInputLabel-root.Mui-focused': {
-                      color: '#EA580C',
-                    },
-                  }}
                 />
               </Box>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  bgcolor: '#FFF7ED',
-                  borderRadius: 2,
-                }}
-              >
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.active}
-                      onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: '#EA580C',
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          bgcolor: '#EA580C',
-                        },
-                      }}
-                    />
-                  }
-                  label={<Typography sx={{ fontWeight: 600 }}>Active Status</Typography>}
-                />
-              </Paper>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                    sx={{
+                      '& .MuiSwitch-switchBase.Mui-checked': { color: '#10B981' },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#10B981' },
+                    }}
+                  />
+                }
+                label={<Typography sx={{ fontWeight: 500 }}>Active</Typography>}
+              />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ p: 3, gap: 1 }}>
-            <Button
-              onClick={() => setDialogOpen(false)}
-              sx={{
-                color: '#64748B',
-                '&:hover': {
-                  bgcolor: '#F1F5F9',
-                },
-              }}
-            >
+          <DialogActions sx={{ p: 2.5, pt: 0 }}>
+            <Button onClick={() => setDialogOpen(false)} sx={{ textTransform: 'none', color: '#64748B' }}>
               Cancel
             </Button>
             <Button
               type="submit"
               variant="contained"
+              className="tm-btn"
               sx={{
-                background: 'linear-gradient(135deg, #EA580C 0%, #DC2626 100%)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #C2410C 0%, #B91C1C 100%)',
-                  transform: 'scale(1.02)',
-                },
-                transition: 'all 0.3s ease',
-                px: 4,
+                textTransform: 'none',
+                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+                px: 3,
                 borderRadius: 2,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)',
+                },
               }}
             >
               {editingHoliday ? 'Update' : 'Create'}

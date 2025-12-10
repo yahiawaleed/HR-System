@@ -16,8 +16,11 @@ export class ShiftAssignment{
     @Prop({type: Types.ObjectId, ref: 'Position'})
     positionId?: Types.ObjectId;
 
-    @Prop({type: Types.ObjectId, ref: 'Shift', required: true})
-    shiftId: Types.ObjectId;
+    @Prop({type: Types.ObjectId, ref: 'ShiftType', required: true})
+    shiftTypeId: Types.ObjectId;
+
+    @Prop({type: Types.ObjectId, ref: 'Shift'})
+    shiftId?: Types.ObjectId;
 
     @Prop({type: Types.ObjectId, ref: 'ScheduleRule'})
     scheduleRuleId?: Types.ObjectId;

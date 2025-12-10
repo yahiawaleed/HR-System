@@ -1,244 +1,271 @@
 'use client';
 
-import { useState } from 'react';
-import { Box, Typography, Paper, Tabs as MuiTabs, Tab } from '@mui/material';
-import { Clock, Users, Calendar, CalendarDays, Sparkles, LogIn, FileEdit } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Tabs as MuiTabs, Tab, Tooltip, Badge } from '@mui/material';
+import { Clock, Users, Calendar, CalendarDays, LogIn, FileEdit, Sparkles } from 'lucide-react';
 import ShiftTypesTab from '@/components/time-management/ShiftTypesTab';
 import ShiftAssignmentsTab from '@/components/time-management/ShiftAssignmentsTab';
 import ScheduleRulesTab from '@/components/time-management/ScheduleRulesTab';
 import HolidaysTab from '@/components/time-management/HolidaysTab';
 import AttendanceTab from '@/components/time-management/AttendanceTab';
 import CorrectionRequestsTab from '@/components/time-management/CorrectionRequestsTab';
+import '@/styles/time-management.css';
+
+const tabs = [
+  { label: 'Shift Types', icon: Clock, color: '#6366F1', gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)' },
+  { label: 'Assignments', icon: Users, color: '#8B5CF6', gradient: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%)' },
+  { label: 'Schedule Rules', icon: Calendar, color: '#10B981', gradient: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)' },
+  { label: 'Holidays', icon: CalendarDays, color: '#F59E0B', gradient: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)' },
+  { label: 'Attendance', icon: LogIn, color: '#EC4899', gradient: 'linear-gradient(135deg, #EC4899 0%, #F472B6 100%)' },
+  { label: 'Corrections', icon: FileEdit, color: '#14B8A6', gradient: 'linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%)' },
+];
 
 export default function TimeManagementPage() {
   const [activeTab, setActiveTab] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  // Update time every second for live clock
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 0: return <ShiftTypesTab />;
+      case 1: return <ShiftAssignmentsTab />;
+      case 2: return <ScheduleRulesTab />;
+      case 3: return <HolidaysTab />;
+      case 4: return <AttendanceTab />;
+      case 5: return <CorrectionRequestsTab />;
+      default: return <ShiftTypesTab />;
+    }
+  };
+
+  const currentColor = tabs[activeTab]?.color || '#6366F1';
+  const currentGradient = tabs[activeTab]?.gradient || tabs[0].gradient;
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Box sx={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #e3f2fd 50%, #ede7f6 100%)' }}>
-        <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3 }}>
-          {/* Hero Header with Gradient */}
-          <Paper
-            elevation={0}
-            sx={{
-              position: 'relative',
-              overflow: 'hidden',
-              borderRadius: 6,
-              background: 'linear-gradient(135deg, #2563EB 0%, #5B21B6 50%, #7C3AED 100%)',
-              p: 4,
-              mb: 4,
-              boxShadow: '0 20px 40px -10px rgba(37, 99, 235, 0.4)',
-            }}
-          >
-            {/* Decorative circles */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: -100,
-                right: -100,
-                width: 300,
-                height: 300,
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: '50%',
-                filter: 'blur(60px)',
-              }}
-            />
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: -100,
-                left: -100,
-                width: 300,
-                height: 300,
-                bgcolor: 'rgba(124, 58, 237, 0.3)',
-                borderRadius: '50%',
-                filter: 'blur(60px)',
-              }}
-            />
-            
-            <Box sx={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Paper
-                elevation={0}
+    <Box sx={{ minHeight: '100vh', bgcolor: '#F8FAFC', pb: 4 }}>
+      <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pt: 3 }}>
+        {/* Enhanced Header */}
+        <Paper
+          elevation={0}
+          className="tm-fade-in-up"
+          sx={{
+            borderRadius: 4,
+            p: 3,
+            mb: 3,
+            background: `linear-gradient(135deg, ${currentColor}15 0%, ${currentColor}08 50%, transparent 100%)`,
+            border: '1px solid',
+            borderColor: `${currentColor}25`,
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '300px',
+              height: '300px',
+              background: `radial-gradient(circle, ${currentColor}10 0%, transparent 70%)`,
+              transform: 'translate(50%, -50%)',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5 }}>
+              <Box
+                className="tm-float"
                 sx={{
-                  p: 2,
-                  bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  backdropFilter: 'blur(10px)',
+                  width: 56,
+                  height: 56,
                   borderRadius: 3,
+                  background: currentGradient,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 8px 24px ${currentColor}40`,
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    inset: -2,
+                    borderRadius: 4,
+                    background: currentGradient,
+                    opacity: 0.3,
+                    filter: 'blur(8px)',
+                    zIndex: -1,
+                  },
                 }}
               >
-                <Clock size={32} color="white" />
-              </Paper>
+                <Clock size={28} color="white" />
+              </Box>
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="h3" sx={{ fontWeight: 900, color: 'white' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>
                     Time Management
                   </Typography>
-                  <Sparkles size={24} color="#FCD34D" className="animate-pulse" />
+                  <Sparkles size={18} color={currentColor} style={{ opacity: 0.7 }} />
                 </Box>
-                <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.9)', mt: 0.5 }}>
-                  Orchestrate shifts, schedules, and team availability with precision
+                <Typography variant="body2" sx={{ color: '#64748B', mt: 0.25 }}>
+                  Manage shifts, schedules, and attendance tracking
                 </Typography>
               </Box>
             </Box>
-          </Paper>
-
-          {/* Material-UI Tabs with Gradient */}
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 4,
-              bgcolor: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(10px)',
-              mb: 4,
-            }}
-          >
-            <MuiTabs
-              value={activeTab}
-              onChange={handleTabChange}
-              variant="fullWidth"
-              sx={{
-                '& .MuiTab-root': {
-                  py: 2.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
-                },
-                '& .Mui-selected': {
-                  color: 'white !important',
-                },
-                '& .MuiTabs-indicator': {
-                  display: 'none',
-                },
+            
+            {/* Live Clock Display */}
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 2,
+                bgcolor: 'white',
+                px: 3,
+                py: 1.5,
+                borderRadius: 3,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: '1px solid #E2E8F0',
               }}
             >
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Clock size={18} />
-                    Shift Types
-                  </Box>
-                }
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #2563EB 0%, #4F46E5 100%)',
-                    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
-                  },
-                }}
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Users size={18} />
-                    Assignments
-                  </Box>
-                }
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #9333EA 0%, #EC4899 100%)',
-                    boxShadow: '0 4px 12px rgba(147, 51, 234, 0.4)',
-                  },
-                }}
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Calendar size={18} />
-                    Schedule Rules
-                  </Box>
-                }
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-                    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.4)',
-                  },
-                }}
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CalendarDays size={18} />
-                    Holidays
-                  </Box>
-                }
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #EA580C 0%, #DC2626 100%)',
-                    boxShadow: '0 4px 12px rgba(234, 88, 12, 0.4)',
-                  },
-                }}
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LogIn size={18} />
-                    Attendance
-                  </Box>
-                }
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)',
-                    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.4)',
-                  },
-                }}
-              />
-              <Tab
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <FileEdit size={18} />
-                    Corrections
-                  </Box>
-                }
-                sx={{
-                  borderRadius: 3,
-                  mx: 1,
-                  '&.Mui-selected': {
-                    background: 'linear-gradient(135deg, #00897b 0%, #26a69a 100%)',
-                    boxShadow: '0 4px 12px rgba(0, 137, 123, 0.4)',
-                  },
-                }}
-              />
-            </MuiTabs>
-          </Paper>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography variant="caption" sx={{ color: '#94A3B8', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Current Time
+                </Typography>
+                <Typography 
+                  className="tm-time-display"
+                  sx={{ 
+                    fontWeight: 700, 
+                    fontSize: '1.5rem', 
+                    color: '#1E293B',
+                    lineHeight: 1,
+                  }}
+                >
+                  {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </Typography>
+              </Box>
+              <Box sx={{ 
+                width: 44, 
+                height: 44, 
+                borderRadius: 2, 
+                background: `${currentColor}15`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Clock size={22} color={currentColor} />
+              </Box>
+            </Box>
+          </Box>
+        </Paper>
 
-          {/* Tab Content */}
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+        {/* Enhanced Tabs */}
+        <Paper
+          elevation={0}
+          className="tm-scale-in"
+          sx={{
+            borderRadius: 3,
+            bgcolor: 'white',
+            mb: 3,
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          }}
+        >
+          <MuiTabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                py: 2.5,
+                px: 3,
+                minHeight: 64,
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                textTransform: 'none',
+                color: '#64748B',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                borderBottom: '3px solid transparent',
+                '&:hover': {
+                  color: '#1E293B',
+                  bgcolor: '#F8FAFC',
+                },
+              },
+              '& .Mui-selected': {
+                color: `${currentColor} !important`,
+                fontWeight: 600,
+                bgcolor: `${currentColor}08 !important`,
+              },
+              '& .MuiTabs-indicator': {
+                height: 3,
+                borderRadius: '3px 3px 0 0',
+                background: currentGradient,
+                transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: `0 -2px 10px ${currentColor}50`,
+              },
+            }}
           >
-            {activeTab === 0 && <ShiftTypesTab />}
-            {activeTab === 1 && <ShiftAssignmentsTab />}
-            {activeTab === 2 && <ScheduleRulesTab />}
-            {activeTab === 3 && <HolidaysTab />}
-            {activeTab === 4 && <AttendanceTab />}
-            {activeTab === 5 && <CorrectionRequestsTab />}
-          </motion.div>
+            {tabs.map((tab, index) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === index;
+              return (
+                <Tab
+                  key={tab.label}
+                  label={
+                    <Tooltip title={tab.label} placement="bottom" arrow>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 2,
+                            background: isActive ? tab.gradient : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease',
+                            boxShadow: isActive ? `0 4px 12px ${tab.color}40` : 'none',
+                          }}
+                        >
+                          <Icon 
+                            size={18} 
+                            style={{ 
+                              color: isActive ? 'white' : tab.color,
+                              transition: 'color 0.3s ease',
+                            }} 
+                          />
+                        </Box>
+                        <span>{tab.label}</span>
+                      </Box>
+                    </Tooltip>
+                  }
+                />
+              );
+            })}
+          </MuiTabs>
+        </Paper>
+
+        {/* Tab Content with smooth transition */}
+        <Box 
+          key={activeTab} 
+          className="tm-fade-in-up"
+          sx={{
+            '& > *': {
+              animation: 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            },
+          }}
+        >
+          {renderTabContent()}
         </Box>
       </Box>
-    </motion.div>
+    </Box>
   );
 }
