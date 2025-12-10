@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
   Box,
   Paper,
@@ -82,7 +83,7 @@ export default function HolidaysTab() {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/time-management/holidays', {
+      const response = await fetch(`${API_BASE_URL}/time-management/holidays`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -103,7 +104,7 @@ export default function HolidaysTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('Holiday name is required');
       return;
@@ -129,9 +130,9 @@ export default function HolidaysTab() {
       };
 
       const url = editingHoliday
-        ? `http://localhost:3000/time-management/holidays/${editingHoliday._id}`
-        : 'http://localhost:3000/time-management/holidays';
-      
+        ? `${API_BASE_URL}/time-management/holidays/${editingHoliday._id}`
+        : `${API_BASE_URL}/time-management/holidays`;
+
       const response = await fetch(url, {
         method: editingHoliday ? 'PATCH' : 'POST',
         headers: {
@@ -178,7 +179,7 @@ export default function HolidaysTab() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/time-management/holidays/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/holidays/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

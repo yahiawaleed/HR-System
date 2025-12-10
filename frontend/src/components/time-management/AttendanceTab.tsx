@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
   Box,
   Paper,
@@ -93,7 +94,7 @@ export default function AttendanceTab() {
   const isHRManager = ['HR Manager'].includes(userRole);
   const isManager = ['Department Head', 'Line Manager'].includes(userRole);
   const isEmployee = !isAdmin && !isHRManager && !isManager;
-  
+
   // Who can do what
   const canViewAllRecords = isAdmin || isHRManager;
   const canViewTeamRecords = isManager;
@@ -126,27 +127,27 @@ export default function AttendanceTab() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [recordsRes, todayRes, policyRes, employeesRes] = await Promise.all([
-        fetch('http://localhost:3000/time-management/attendance', { headers }),
-        fetch('http://localhost:3000/time-management/attendance/my-today', { headers }),
-        fetch('http://localhost:3000/time-management/settings/punch-policy', { headers }),
-        fetch('http://localhost:3000/api/employee-profile', { headers }),
+        fetch(`${API_BASE_URL}/time-management/attendance`, { headers }),
+        fetch(`${API_BASE_URL}/time-management/attendance/my-today`, { headers }),
+        fetch(`${API_BASE_URL}/time-management/settings/punch-policy`, { headers }),
+        fetch(`${API_BASE_URL}/api/employee-profile`, { headers }),
       ]);
 
       if (recordsRes.ok) {
         const data = await recordsRes.json();
         const allRecords = Array.isArray(data) ? data : [];
         setRecords(allRecords);
-        
+
         // Filter today's records for schedule view
         // Use the same formatting as displayDate to ensure consistency
         const todayFormatted = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        
+
         const todaysRecords = allRecords.filter((r: AttendanceRecord) => {
           if (!r.date) return false;
           const recordFormatted = new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
           return recordFormatted === todayFormatted;
         });
-        
+
         setTodayAllRecords(todaysRecords);
       }
 
@@ -176,13 +177,13 @@ export default function AttendanceTab() {
   const handleClockIn = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (!token || !userId) {
         toast.error('Please login first');
         return;
       }
 
-      const response = await fetch('http://localhost:3000/time-management/attendance/clock-in', {
+      const response = await fetch(`${API_BASE_URL}/time-management/attendance/clock-in`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -207,13 +208,13 @@ export default function AttendanceTab() {
   const handleClockOut = async () => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (!token || !userId) {
         toast.error('Please login first');
         return;
       }
 
-      const response = await fetch('http://localhost:3000/time-management/attendance/clock-out', {
+      const response = await fetch(`${API_BASE_URL}/time-management/attendance/clock-out`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +242,7 @@ export default function AttendanceTab() {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch(`http://localhost:3000/time-management/attendance/${selectedRecord._id}`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/attendance/${selectedRecord._id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -297,7 +298,7 @@ export default function AttendanceTab() {
         fullName: 'Unknown Employee',
         employeeNumber: 'N/A'
       };
-      
+
       if (!record.punches || record.punches.length === 0) {
         return {
           employee,
@@ -331,19 +332,19 @@ export default function AttendanceTab() {
   };
 
   const todaySchedule = getTodayAttendanceSchedule();
-  
+
   // Count statistics
   const checkedInCount = todaySchedule.filter(s => s.status === 'checked-in').length;
   const checkedOutCount = todaySchedule.filter(s => s.status === 'checked-out').length;
   const notArrivedCount = todaySchedule.filter(s => s.status === 'not-arrived').length;
 
   // Filter schedule based on selected filter
-  const filteredSchedule = scheduleFilter === 'all' 
-    ? todaySchedule 
+  const filteredSchedule = scheduleFilter === 'all'
+    ? todaySchedule
     : todaySchedule.filter(s => s.status === scheduleFilter);
 
   // Filter records based on role
-  const filteredRecords = isEmployee 
+  const filteredRecords = isEmployee
     ? records.filter(r => r.employeeId?._id === userId)
     : records;
 
@@ -359,8 +360,8 @@ export default function AttendanceTab() {
     <Box>
       {/* Tab Navigation */}
       <Paper elevation={0} sx={{ borderRadius: 3, mb: 3, overflow: 'hidden' }}>
-        <Tabs 
-          value={activeTab} 
+        <Tabs
+          value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           sx={{
             bgcolor: '#f5f5f5',
@@ -379,15 +380,15 @@ export default function AttendanceTab() {
             },
           }}
         >
-          <Tab 
-            icon={<Clock size={18} />} 
-            iconPosition="start" 
-            label="Today" 
+          <Tab
+            icon={<Clock size={18} />}
+            iconPosition="start"
+            label="Today"
           />
-          <Tab 
-            icon={<History size={18} />} 
-            iconPosition="start" 
-            label="History" 
+          <Tab
+            icon={<History size={18} />}
+            iconPosition="start"
+            label="History"
           />
         </Tabs>
       </Paper>
@@ -415,7 +416,7 @@ export default function AttendanceTab() {
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </Typography>
-                
+
                 {todayRecord && todayRecord.punches.length > 0 ? (
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
@@ -439,7 +440,7 @@ export default function AttendanceTab() {
                   </Typography>
                 )}
               </Grid>
-              
+
               <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                 <Button
                   variant="contained"
@@ -491,11 +492,11 @@ export default function AttendanceTab() {
           {/* Today's Attendance Schedule - Only for managers and above */}
           {(canViewAllRecords || canViewTeamRecords) && (
             <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-              <Box sx={{ 
-                p: 2, 
-                borderBottom: '1px solid #e0e0e0', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <Box sx={{
+                p: 2,
+                borderBottom: '1px solid #e0e0e0',
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 gap: 2
@@ -504,15 +505,15 @@ export default function AttendanceTab() {
                   <Users style={{ marginRight: 8, verticalAlign: 'middle', color: '#9c27b0' }} />
                   Who's Working Today
                 </Typography>
-                
+
                 {/* Statistics Cards */}
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Chip
                     icon={<UserCheck size={16} />}
                     label={`Working: ${checkedInCount}`}
                     onClick={() => setScheduleFilter(scheduleFilter === 'checked-in' ? 'all' : 'checked-in')}
-                    sx={{ 
-                      bgcolor: scheduleFilter === 'checked-in' ? '#4caf50' : '#e8f5e9', 
+                    sx={{
+                      bgcolor: scheduleFilter === 'checked-in' ? '#4caf50' : '#e8f5e9',
                       color: scheduleFilter === 'checked-in' ? 'white' : '#2e7d32',
                       fontWeight: 600,
                       cursor: 'pointer',
@@ -523,8 +524,8 @@ export default function AttendanceTab() {
                     icon={<LogOut size={16} />}
                     label={`Left: ${checkedOutCount}`}
                     onClick={() => setScheduleFilter(scheduleFilter === 'checked-out' ? 'all' : 'checked-out')}
-                    sx={{ 
-                      bgcolor: scheduleFilter === 'checked-out' ? '#2196f3' : '#e3f2fd', 
+                    sx={{
+                      bgcolor: scheduleFilter === 'checked-out' ? '#2196f3' : '#e3f2fd',
                       color: scheduleFilter === 'checked-out' ? 'white' : '#1565c0',
                       fontWeight: 600,
                       cursor: 'pointer',
@@ -554,13 +555,13 @@ export default function AttendanceTab() {
                       </TableRow>
                     ) : (
                       filteredSchedule.map((item) => (
-                        <TableRow 
-                          key={item.employee._id} 
+                        <TableRow
+                          key={item.employee._id}
                           hover
                           sx={{
-                            bgcolor: item.status === 'checked-in' ? 'rgba(76, 175, 80, 0.05)' : 
-                                     item.status === 'checked-out' ? 'rgba(33, 150, 243, 0.05)' :
-                                     'rgba(255, 152, 0, 0.05)'
+                            bgcolor: item.status === 'checked-in' ? 'rgba(76, 175, 80, 0.05)' :
+                              item.status === 'checked-out' ? 'rgba(33, 150, 243, 0.05)' :
+                                'rgba(255, 152, 0, 0.05)'
                           }}
                         >
                           <TableCell>
@@ -570,8 +571,8 @@ export default function AttendanceTab() {
                                   width: 32,
                                   height: 32,
                                   borderRadius: '50%',
-                                  bgcolor: item.status === 'checked-in' ? '#4caf50' : 
-                                           item.status === 'checked-out' ? '#2196f3' : '#ff9800',
+                                  bgcolor: item.status === 'checked-in' ? '#4caf50' :
+                                    item.status === 'checked-out' ? '#2196f3' : '#ff9800',
                                   color: 'white',
                                   display: 'flex',
                                   alignItems: 'center',
@@ -597,19 +598,19 @@ export default function AttendanceTab() {
                               size="small"
                               icon={
                                 item.status === 'checked-in' ? <UserCheck size={14} /> :
-                                item.status === 'checked-out' ? <LogOut size={14} /> :
-                                <UserX size={14} />
+                                  item.status === 'checked-out' ? <LogOut size={14} /> :
+                                    <UserX size={14} />
                               }
                               label={
                                 item.status === 'checked-in' ? 'Working' :
-                                item.status === 'checked-out' ? 'Left' :
-                                'Not Arrived'
+                                  item.status === 'checked-out' ? 'Left' :
+                                    'Not Arrived'
                               }
                               sx={{
-                                bgcolor: item.status === 'checked-in' ? '#e8f5e9' : 
-                                         item.status === 'checked-out' ? '#e3f2fd' : '#fff3e0',
-                                color: item.status === 'checked-in' ? '#2e7d32' : 
-                                       item.status === 'checked-out' ? '#1565c0' : '#e65100',
+                                bgcolor: item.status === 'checked-in' ? '#e8f5e9' :
+                                  item.status === 'checked-out' ? '#e3f2fd' : '#fff3e0',
+                                color: item.status === 'checked-in' ? '#2e7d32' :
+                                  item.status === 'checked-out' ? '#1565c0' : '#e65100',
                                 fontWeight: 500,
                               }}
                             />
@@ -667,108 +668,108 @@ export default function AttendanceTab() {
 
           <TableContainer>
             <Table>
-            <TableHead sx={{ bgcolor: '#f5f5f5' }}>
-              <TableRow>
-                {!isEmployee && <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>}
-                <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Punches</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Work Time</TableCell>
-                <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredRecords.length === 0 ? (
+              <TableHead sx={{ bgcolor: '#f5f5f5' }}>
                 <TableRow>
-                  <TableCell colSpan={isEmployee ? 5 : 6} align="center" sx={{ py: 4, color: '#666' }}>
-                    No attendance records found
-                  </TableCell>
+                  {!isEmployee && <TableCell sx={{ fontWeight: 600 }}>Employee</TableCell>}
+                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Punches</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Work Time</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 600 }}>Actions</TableCell>
                 </TableRow>
-              ) : (
-                filteredRecords.map((record) => (
-                  <TableRow key={record._id} hover>
-                    {!isEmployee && (
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {record.employeeId?.fullName || 'Unknown'}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#666' }}>
-                          {record.employeeId?.employeeNumber}
-                        </Typography>
-                      </TableCell>
-                    )}
-                    <TableCell>{formatDate(record.date)}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                        {record.punches.map((punch, idx) => (
-                          <Chip
-                            key={idx}
-                            size="small"
-                            label={`${punch.type} ${formatTime(punch.time)}`}
-                            sx={{
-                              bgcolor: punch.type === 'IN' ? '#e8f5e9' : '#ffebee',
-                              color: punch.type === 'IN' ? '#2e7d32' : '#c62828',
-                              fontSize: '0.7rem',
-                            }}
-                          />
-                        ))}
-                      </Box>
+              </TableHead>
+              <TableBody>
+                {filteredRecords.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={isEmployee ? 5 : 6} align="center" sx={{ py: 4, color: '#666' }}>
+                      No attendance records found
                     </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Timer size={16} color="#9c27b0" />
-                        {formatWorkTime(record.totalWorkMinutes)}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      {record.hasMissedPunch ? (
-                        <Chip
-                          size="small"
-                          icon={<AlertTriangle size={14} />}
-                          label="Missed Punch"
-                          sx={{ bgcolor: '#fff3e0', color: '#e65100' }}
-                        />
-                      ) : record.finalisedForPayroll ? (
-                        <Chip size="small" label="Complete" sx={{ bgcolor: '#e8f5e9', color: '#2e7d32' }} />
-                      ) : (
-                        <Chip size="small" label="Pending" sx={{ bgcolor: '#e3f2fd', color: '#1565c0' }} />
+                  </TableRow>
+                ) : (
+                  filteredRecords.map((record) => (
+                    <TableRow key={record._id} hover>
+                      {!isEmployee && (
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {record.employeeId?.fullName || 'Unknown'}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#666' }}>
+                            {record.employeeId?.employeeNumber}
+                          </Typography>
+                        </TableCell>
                       )}
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setSelectedRecord(record);
-                          setDetailDialogOpen(true);
-                        }}
-                        sx={{ color: '#9c27b0' }}
-                      >
-                        <Eye size={18} />
-                      </IconButton>
-                      {canCorrectAttendance && (
+                      <TableCell>{formatDate(record.date)}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                          {record.punches.map((punch, idx) => (
+                            <Chip
+                              key={idx}
+                              size="small"
+                              label={`${punch.type} ${formatTime(punch.time)}`}
+                              sx={{
+                                bgcolor: punch.type === 'IN' ? '#e8f5e9' : '#ffebee',
+                                color: punch.type === 'IN' ? '#2e7d32' : '#c62828',
+                                fontSize: '0.7rem',
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Timer size={16} color="#9c27b0" />
+                          {formatWorkTime(record.totalWorkMinutes)}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        {record.hasMissedPunch ? (
+                          <Chip
+                            size="small"
+                            icon={<AlertTriangle size={14} />}
+                            label="Missed Punch"
+                            sx={{ bgcolor: '#fff3e0', color: '#e65100' }}
+                          />
+                        ) : record.finalisedForPayroll ? (
+                          <Chip size="small" label="Complete" sx={{ bgcolor: '#e8f5e9', color: '#2e7d32' }} />
+                        ) : (
+                          <Chip size="small" label="Pending" sx={{ bgcolor: '#e3f2fd', color: '#1565c0' }} />
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
                         <IconButton
                           size="small"
                           onClick={() => {
                             setSelectedRecord(record);
-                            setCorrectionForm({
-                              punches: record.punches.map(p => ({ type: p.type, time: new Date(p.time).toISOString().slice(0, 16) })),
-                              reason: '',
-                            });
-                            setCorrectionDialogOpen(true);
+                            setDetailDialogOpen(true);
                           }}
-                          sx={{ color: '#f57c00' }}
+                          sx={{ color: '#9c27b0' }}
                         >
-                          <Edit size={18} />
+                          <Eye size={18} />
                         </IconButton>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+                        {canCorrectAttendance && (
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setSelectedRecord(record);
+                              setCorrectionForm({
+                                punches: record.punches.map(p => ({ type: p.type, time: new Date(p.time).toISOString().slice(0, 16) })),
+                                reason: '',
+                              });
+                              setCorrectionDialogOpen(true);
+                            }}
+                            sx={{ color: '#f57c00' }}
+                          >
+                            <Edit size={18} />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       )}
 
       {/* Detail Dialog */}
@@ -782,7 +783,7 @@ export default function AttendanceTab() {
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
                 {selectedRecord.employeeId?.fullName} - {formatDate(selectedRecord.date)}
               </Typography>
-              
+
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>Punches:</Typography>
               {selectedRecord.punches.map((punch, idx) => (
                 <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>

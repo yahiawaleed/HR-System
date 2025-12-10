@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
   Box,
   Paper,
@@ -93,7 +94,7 @@ export default function CorrectionRequestsTab() {
   const isHRManager = ['HR Manager'].includes(userRole);
   const isManager = ['Department Head', 'Line Manager'].includes(userRole);
   const isEmployee = !isAdmin && !isHRManager && !isManager;
-  
+
   // Who can do what
   const canReview = isAdmin || isHRManager || isManager;
   const canViewAllRequests = isAdmin || isHRManager;
@@ -111,9 +112,9 @@ export default function CorrectionRequestsTab() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [myRes, pendingRes, allRes] = await Promise.all([
-        fetch('http://localhost:3000/time-management/corrections/my-requests', { headers }),
-        fetch('http://localhost:3000/time-management/corrections/pending', { headers }).catch(() => null),
-        fetch('http://localhost:3000/time-management/corrections', { headers }).catch(() => null),
+        fetch(`${API_BASE_URL}/time-management/corrections/my-requests`, { headers }),
+        fetch(`${API_BASE_URL}/time-management/corrections/pending`, { headers }).catch(() => null),
+        fetch(`${API_BASE_URL}/time-management/corrections`, { headers }).catch(() => null),
       ]);
 
       if (myRes.ok) {
@@ -153,7 +154,7 @@ export default function CorrectionRequestsTab() {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch('http://localhost:3000/time-management/corrections', {
+      const response = await fetch(`${API_BASE_URL}/time-management/corrections`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -187,7 +188,7 @@ export default function CorrectionRequestsTab() {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch(`http://localhost:3000/time-management/corrections/${selectedRequest._id}/review`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/corrections/${selectedRequest._id}/review`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

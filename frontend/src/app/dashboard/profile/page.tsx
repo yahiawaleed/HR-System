@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { profileService } from '@/services/profileService';
 import { employeeService } from '@/services/employeeService';
+import { API_BASE_URL } from '@/services/api';
 import {
     Box,
     Typography,
@@ -154,7 +155,7 @@ export default function ProfilePage() {
     );
 
     const profilePictureUrl = profile?.profilePictureUrl
-        ? `http://localhost:3000${profile.profilePictureUrl}`
+        ? `${API_BASE_URL}${profile.profilePictureUrl}`
         : undefined;
 
     return (

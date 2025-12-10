@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
   Box,
   Paper,
@@ -69,7 +70,7 @@ export default function ScheduleRulesTab() {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/time-management/schedule-rules', {
+      const response = await fetch(`${API_BASE_URL}/time-management/schedule-rules`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -90,7 +91,7 @@ export default function ScheduleRulesTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('Rule name is required');
       return;
@@ -108,9 +109,9 @@ export default function ScheduleRulesTab() {
       }
 
       const url = editingRule
-        ? `http://localhost:3000/time-management/schedule-rules/${editingRule._id}`
-        : 'http://localhost:3000/time-management/schedule-rules';
-      
+        ? `${API_BASE_URL}/time-management/schedule-rules/${editingRule._id}`
+        : `${API_BASE_URL}/time-management/schedule-rules`;
+
       const response = await fetch(url, {
         method: editingRule ? 'PATCH' : 'POST',
         headers: {
@@ -151,7 +152,7 @@ export default function ScheduleRulesTab() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/time-management/schedule-rules/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/schedule-rules/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

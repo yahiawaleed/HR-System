@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
   Box,
   Paper,
@@ -74,7 +75,7 @@ export default function ShiftAssignmentsTab() {
   const isHRManager = ['HR Manager'].includes(userRole);
   const isManager = ['Department Head', 'Line Manager'].includes(userRole);
   const isEmployee = !isAdmin && !isHRManager && !isManager;
-  
+
   // Who can do what
   const canCreate = isAdmin || isHRManager;
   const canEdit = isAdmin || isHRManager;
@@ -107,9 +108,9 @@ export default function ShiftAssignmentsTab() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const [assignmentsRes, employeesRes, shiftTypesRes] = await Promise.all([
-        fetch('http://localhost:3000/time-management/shifts', { headers }),
-        fetch('http://localhost:3000/api/employee-profile', { headers }),
-        fetch('http://localhost:3000/time-management/shift-types', { headers }),
+        fetch(`${API_BASE_URL}/time-management/shifts`, { headers }),
+        fetch(`${API_BASE_URL}/api/employee-profile`, { headers }),
+        fetch(`${API_BASE_URL}/time-management/shift-types`, { headers }),
       ]);
 
       if (!assignmentsRes.ok || !employeesRes.ok || !shiftTypesRes.ok) {
@@ -135,7 +136,7 @@ export default function ShiftAssignmentsTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.employeeId) {
       toast.error('Please select an employee');
       return;
@@ -164,7 +165,7 @@ export default function ShiftAssignmentsTab() {
         status: formData.status,
       };
 
-      const response = await fetch('http://localhost:3000/time-management/shifts/assign', {
+      const response = await fetch(`${API_BASE_URL}/time-management/shifts/assign`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +199,7 @@ export default function ShiftAssignmentsTab() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/time-management/shifts/${selectedAssignment._id}/status`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/shifts/${selectedAssignment._id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -232,7 +233,7 @@ export default function ShiftAssignmentsTab() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/time-management/shifts/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/shifts/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -282,7 +283,7 @@ export default function ShiftAssignmentsTab() {
   };
 
   // Filter assignments based on role
-  const filteredAssignments = isEmployee 
+  const filteredAssignments = isEmployee
     ? assignments.filter(a => a.employeeId?._id === userId)
     : assignments;
 

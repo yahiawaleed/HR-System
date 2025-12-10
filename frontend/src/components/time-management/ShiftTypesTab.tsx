@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
   Box,
   Paper,
@@ -68,7 +69,7 @@ export default function ShiftTypesTab() {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/time-management/shift-types', {
+      const response = await fetch(`${API_BASE_URL}/time-management/shift-types`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -89,7 +90,7 @@ export default function ShiftTypesTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('Shift type name is required');
       return;
@@ -103,9 +104,9 @@ export default function ShiftTypesTab() {
       }
 
       const url = editingShiftType
-        ? `http://localhost:3000/time-management/shift-types/${editingShiftType._id}`
-        : 'http://localhost:3000/time-management/shift-types';
-      
+        ? `${API_BASE_URL}/time-management/shift-types/${editingShiftType._id}`
+        : `${API_BASE_URL}/time-management/shift-types`;
+
       const response = await fetch(url, {
         method: editingShiftType ? 'PATCH' : 'POST',
         headers: {
@@ -146,7 +147,7 @@ export default function ShiftTypesTab() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3000/time-management/shift-types/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/time-management/shift-types/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

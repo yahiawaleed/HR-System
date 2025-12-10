@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import ReactFlow, {
     Node,
     Edge,
@@ -36,7 +37,7 @@ interface OrgChartProps {
 // Custom node component
 const CustomNode = ({ data }: any) => {
     const profilePictureUrl = data.profilePictureUrl
-        ? `http://localhost:3000${data.profilePictureUrl}`
+        ? `${API_BASE_URL}${data.profilePictureUrl}`
         : undefined;
 
     return (
