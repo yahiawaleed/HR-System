@@ -10,6 +10,9 @@ import { NotificationLog } from './models/notification-log.schema';
 import { AttendanceRecord, AttendanceRecordDocument, Punch } from './models/attendance-record.schema';
 import { AttendanceCorrectionRequest, AttendanceCorrectionRequestDocument } from './models/attendance-correction-request.schema';
 import { Settings, SettingsDocument } from './models/settings.schema';
+import { OvertimeRule, OvertimeRuleDocument } from './models/overtime-rule.schema';
+import { LatenessRule, LatenessRuleDocument } from './models/lateness-rule.schema';
+import { TimeException, TimeExceptionDocument } from './models/time-exception.schema';
 import {
   CreateShiftTypeDto,
   UpdateShiftTypeDto,
@@ -26,6 +29,11 @@ import {
   UpdatePunchPolicyDto,
   CreateCorrectionRequestDto,
   ReviewCorrectionDto,
+  CreateOvertimeRuleDto,
+  UpdateOvertimeRuleDto,
+  CreateLatenessRuleDto,
+  UpdateLatenessRuleDto,
+  GetReportDto,
 } from './dto';
 import { ShiftAssignmentStatus, PunchType, CorrectionRequestStatus } from './models/enums';
 import { ReviewAction } from './dto/review-correction.dto';
@@ -41,10 +49,13 @@ export class TimeManagementService {
     @InjectModel(AttendanceRecord.name) private attendanceRecordModel: Model<AttendanceRecordDocument>,
     @InjectModel(AttendanceCorrectionRequest.name) private correctionRequestModel: Model<AttendanceCorrectionRequestDocument>,
     @InjectModel(Settings.name) private settingsModel: Model<SettingsDocument>,
-  ) {}
+    @InjectModel(OvertimeRule.name) private overtimeRuleModel: Model<OvertimeRuleDocument>,
+    @InjectModel(LatenessRule.name) private latenessRuleModel: Model<LatenessRuleDocument>,
+    @InjectModel(TimeException.name) private timeExceptionModel: Model<TimeExceptionDocument>,
+  ) { }
 
   // ==================== SHIFT TYPES ====================
-  
+
   async createShiftType(dto: CreateShiftTypeDto) {
     const shiftType = new this.shiftTypeModel(dto);
     return shiftType.save();
@@ -68,7 +79,7 @@ export class TimeManagementService {
       dto,
       { new: true }
     ).exec();
-    
+
     if (!shiftType) {
       throw new NotFoundException(`Shift type with ID ${id} not found`);
     }
@@ -90,7 +101,7 @@ export class TimeManagementService {
   }
 
   // ==================== SHIFT ASSIGNMENTS ====================
-  
+
   async assignShift(dto: AssignShiftDto) {
     // Validate that at least one of employeeId, departmentId, or positionId is provided
     if (!dto.employeeId && !dto.departmentId && !dto.positionId) {
@@ -107,7 +118,7 @@ export class TimeManagementService {
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
       status: dto.status || ShiftAssignmentStatus.PENDING,
     });
-    
+
     return assignment.save();
   }
 
@@ -131,7 +142,7 @@ export class TimeManagementService {
       .populate('shiftId')
       .populate('scheduleRuleId')
       .exec();
-      
+
     if (!shift) {
       throw new NotFoundException(`Shift assignment with ID ${id} not found`);
     }
@@ -148,7 +159,7 @@ export class TimeManagementService {
 
   async updateShift(id: string, dto: UpdateShiftDto) {
     const updateData: any = {};
-    
+
     if (dto.employeeId) updateData.employeeId = dto.employeeId;
     if (dto.departmentId) updateData.departmentId = dto.departmentId;
     if (dto.positionId) updateData.positionId = dto.positionId;
@@ -163,13 +174,13 @@ export class TimeManagementService {
       updateData,
       { new: true }
     )
-    .populate('employeeId', 'firstName lastName employeeNumber')
-    .populate('departmentId', 'name')
-    .populate('positionId', 'title')
-    .populate('shiftId')
-    .populate('scheduleRuleId')
-    .exec();
-    
+      .populate('employeeId', 'firstName lastName employeeNumber')
+      .populate('departmentId', 'name')
+      .populate('positionId', 'title')
+      .populate('shiftId')
+      .populate('scheduleRuleId')
+      .exec();
+
     if (!shift) {
       throw new NotFoundException(`Shift assignment with ID ${id} not found`);
     }
@@ -182,13 +193,13 @@ export class TimeManagementService {
       { status: dto.status },
       { new: true }
     )
-    .populate('employeeId', 'firstName lastName employeeNumber')
-    .populate('departmentId', 'name')
-    .populate('positionId', 'title')
-    .populate('shiftId')
-    .populate('scheduleRuleId')
-    .exec();
-    
+      .populate('employeeId', 'firstName lastName employeeNumber')
+      .populate('departmentId', 'name')
+      .populate('positionId', 'title')
+      .populate('shiftId')
+      .populate('scheduleRuleId')
+      .exec();
+
     if (!shift) {
       throw new NotFoundException(`Shift assignment with ID ${id} not found`);
     }
@@ -204,7 +215,7 @@ export class TimeManagementService {
   }
 
   // ==================== SCHEDULE RULES ====================
-  
+
   async createScheduleRule(dto: CreateScheduleRuleDto) {
     const rule = new this.scheduleRuleModel(dto);
     return rule.save();
@@ -228,7 +239,7 @@ export class TimeManagementService {
       dto,
       { new: true }
     ).exec();
-    
+
     if (!rule) {
       throw new NotFoundException(`Schedule rule with ID ${id} not found`);
     }
@@ -250,7 +261,7 @@ export class TimeManagementService {
   }
 
   // ==================== HOLIDAYS ====================
-  
+
   async createHoliday(dto: CreateHolidayDto) {
     const holiday = new this.holidayModel({
       type: dto.type,
@@ -276,7 +287,7 @@ export class TimeManagementService {
 
   async updateHoliday(id: string, dto: UpdateHolidayDto) {
     const updateData: any = {};
-    
+
     if (dto.type) updateData.type = dto.type;
     if (dto.startDate) updateData.startDate = new Date(dto.startDate);
     if (dto.endDate) updateData.endDate = new Date(dto.endDate);
@@ -288,7 +299,7 @@ export class TimeManagementService {
       updateData,
       { new: true }
     ).exec();
-    
+
     if (!holiday) {
       throw new NotFoundException(`Holiday with ID ${id} not found`);
     }
@@ -385,11 +396,11 @@ export class TimeManagementService {
     };
 
     record.punches.push(punch);
-    
+
     // Calculate total work minutes
     record.totalWorkMinutes = this.calculateWorkMinutes(record.punches);
     record.hasMissedPunch = false;
-    
+
     await record.save();
 
     return { message: 'Clock-out successful', record };
@@ -398,7 +409,7 @@ export class TimeManagementService {
   private calculateWorkMinutes(punches: Punch[]): number {
     let totalMinutes = 0;
     const sortedPunches = [...punches].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-    
+
     for (let i = 0; i < sortedPunches.length - 1; i += 2) {
       if (sortedPunches[i].type === PunchType.IN && sortedPunches[i + 1]?.type === PunchType.OUT) {
         const inTime = new Date(sortedPunches[i].time).getTime();
@@ -406,7 +417,7 @@ export class TimeManagementService {
         totalMinutes += (outTime - inTime) / (1000 * 60);
       }
     }
-    
+
     return Math.round(totalMinutes);
   }
 
@@ -423,7 +434,7 @@ export class TimeManagementService {
       .findById(id)
       .populate('employeeId', 'firstName lastName fullName employeeNumber')
       .exec();
-    
+
     if (!record) {
       throw new NotFoundException(`Attendance record with ID ${id} not found`);
     }
@@ -449,7 +460,7 @@ export class TimeManagementService {
 
   async correctAttendance(id: string, dto: ManualCorrectionDto) {
     const record = await this.attendanceRecordModel.findById(id);
-    
+
     if (!record) {
       throw new NotFoundException(`Attendance record with ID ${id} not found`);
     }
@@ -485,10 +496,10 @@ export class TimeManagementService {
   async updatePunchPolicy(dto: UpdatePunchPolicyDto) {
     const policy = await this.settingsModel.findOneAndUpdate(
       { key: 'PUNCH_POLICY' },
-      { 
+      {
         value: dto.policy,
-        description: dto.policy === 'MULTIPLE' 
-          ? 'Multiple punches allowed per day' 
+        description: dto.policy === 'MULTIPLE'
+          ? 'Multiple punches allowed per day'
           : 'Only first clock-in and last clock-out count'
       },
       { upsert: true, new: true }
@@ -540,7 +551,7 @@ export class TimeManagementService {
       .populate('attendanceRecordId')
       .populate('reviewedBy', 'firstName lastName fullName')
       .exec();
-    
+
     if (!request) {
       throw new NotFoundException(`Correction request with ID ${id} not found`);
     }
@@ -565,7 +576,7 @@ export class TimeManagementService {
 
   async reviewCorrectionRequest(id: string, dto: ReviewCorrectionDto) {
     const request = await this.correctionRequestModel.findById(id);
-    
+
     if (!request) {
       throw new NotFoundException(`Correction request with ID ${id} not found`);
     }
@@ -574,8 +585,8 @@ export class TimeManagementService {
       throw new BadRequestException('This request has already been reviewed');
     }
 
-    request.status = dto.action === ReviewAction.APPROVE 
-      ? CorrectionRequestStatus.APPROVED 
+    request.status = dto.action === ReviewAction.APPROVE
+      ? CorrectionRequestStatus.APPROVED
       : CorrectionRequestStatus.REJECTED;
     request.reviewedBy = new Types.ObjectId(dto.reviewedBy);
     request.reviewComment = dto.comment;
@@ -665,7 +676,7 @@ export class TimeManagementService {
   }
 
   // ==================== BACKGROUND JOB - SHIFT EXPIRY NOTIFICATION ====================
-  
+
   @Cron('0 8 * * *') // Daily at 8 AM
   async checkExpiringShifts() {
     const sevenDaysFromNow = new Date();
@@ -683,7 +694,7 @@ export class TimeManagementService {
     for (const shift of expiringShifts) {
       const employee = shift.employeeId as any;
       const employeeName = employee ? `${employee.firstName} ${employee.lastName} (${employee.employeeNumber})` : 'Unknown Employee';
-      
+
       await this.notificationLogModel.create({
         type: 'SHIFT_EXPIRY',
         message: `Shift for employee ${employeeName} expires on ${shift.endDate?.toDateString()}`,
@@ -692,5 +703,320 @@ export class TimeManagementService {
     }
 
     console.log(`Checked for expiring shifts: ${expiringShifts.length} shifts expiring in the next 7 days`);
+  }
+
+  // ==================== OVERTIME RULES ====================
+
+  async createOvertimeRule(dto: CreateOvertimeRuleDto) {
+    const overtimeRule = new this.overtimeRuleModel(dto);
+    return overtimeRule.save();
+  }
+
+  async getOvertimeRules() {
+    return this.overtimeRuleModel.find().exec();
+  }
+
+  async getOvertimeRuleById(id: string) {
+    const rule = await this.overtimeRuleModel.findById(id).exec();
+    if (!rule) {
+      throw new NotFoundException(`Overtime rule with ID ${id} not found`);
+    }
+    return rule;
+  }
+
+  async updateOvertimeRule(id: string, dto: UpdateOvertimeRuleDto) {
+    const rule = await this.overtimeRuleModel.findByIdAndUpdate(
+      id,
+      dto,
+      { new: true }
+    ).exec();
+
+    if (!rule) {
+      throw new NotFoundException(`Overtime rule with ID ${id} not found`);
+    }
+    return rule;
+  }
+
+  async deleteOvertimeRule(id: string) {
+    const result = await this.overtimeRuleModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Overtime rule with ID ${id} not found`);
+    }
+    return { message: 'Overtime rule deleted successfully' };
+  }
+
+  // ==================== LATENESS RULES ====================
+
+  async createLatenessRule(dto: CreateLatenessRuleDto) {
+    const latenessRule = new this.latenessRuleModel(dto);
+    return latenessRule.save();
+  }
+
+  async getLatenessRules() {
+    return this.latenessRuleModel.find().exec();
+  }
+
+  async getLatenessRuleById(id: string) {
+    const rule = await this.latenessRuleModel.findById(id).exec();
+    if (!rule) {
+      throw new NotFoundException(`Lateness rule with ID ${id} not found`);
+    }
+    return rule;
+  }
+
+  async updateLatenessRule(id: string, dto: UpdateLatenessRuleDto) {
+    const rule = await this.latenessRuleModel.findByIdAndUpdate(
+      id,
+      dto,
+      { new: true }
+    ).exec();
+
+    if (!rule) {
+      throw new NotFoundException(`Lateness rule with ID ${id} not found`);
+    }
+    return rule;
+  }
+
+  async deleteLatenessRule(id: string) {
+    const result = await this.latenessRuleModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Lateness rule with ID ${id} not found`);
+    }
+    return { message: 'Lateness rule deleted successfully' };
+  }
+
+  // ==================== REPORTS (Story 17) ====================
+
+  async getOvertimeReport(dto: GetReportDto) {
+    const query: any = {
+      date: {
+        $gte: new Date(dto.startDate),
+        $lte: new Date(dto.endDate),
+      },
+    };
+
+    if (dto.employeeId) {
+      query.employeeId = new Types.ObjectId(dto.employeeId);
+    }
+
+    if (dto.departmentId) {
+      // Filter through attendance records that match employees in the department
+      // This is a placeholder - full implementation would require joining with employee data
+      query.departmentId = new Types.ObjectId(dto.departmentId);
+    }
+
+    const records = await this.attendanceRecordModel
+      .find(query)
+      .populate('employeeId', 'firstName lastName fullName employeeNumber departmentId')
+      .sort({ date: -1 })
+      .exec();
+
+    // Calculate overtime (work minutes exceeding standard 8 hours = 480 minutes)
+    const overtimeData = records.map(record => ({
+      employee: record.employeeId,
+      date: record.date,
+      totalWorkMinutes: record.totalWorkMinutes,
+      overtimeMinutes: Math.max(0, (record.totalWorkMinutes || 0) - 480),
+    })).filter(r => r.overtimeMinutes > 0);
+
+    return {
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      totalRecords: overtimeData.length,
+      data: overtimeData,
+    };
+  }
+
+  async getLatenessReport(dto: GetReportDto) {
+    const query: any = {
+      date: {
+        $gte: new Date(dto.startDate),
+        $lte: new Date(dto.endDate),
+      },
+      isLate: true,
+    };
+
+    if (dto.employeeId) {
+      query.employeeId = new Types.ObjectId(dto.employeeId);
+    }
+
+    const records = await this.attendanceRecordModel
+      .find(query)
+      .populate('employeeId', 'firstName lastName fullName employeeNumber')
+      .sort({ date: -1 })
+      .exec();
+
+    return {
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      totalRecords: records.length,
+      data: records.map(record => ({
+        employee: record.employeeId,
+        date: record.date,
+        lateMinutes: record.lateMinutes || 0,
+      })),
+    };
+  }
+
+  async getExceptionsReport(dto: GetReportDto) {
+    const query: any = {
+      createdAt: {
+        $gte: new Date(dto.startDate),
+        $lte: new Date(dto.endDate),
+      },
+    };
+
+    if (dto.employeeId) {
+      query.employeeId = new Types.ObjectId(dto.employeeId);
+    }
+
+    const exceptions = await this.timeExceptionModel
+      .find(query)
+      .populate('employeeId', 'firstName lastName fullName employeeNumber')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    return {
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      totalRecords: exceptions.length,
+      data: exceptions,
+    };
+  }
+
+  async getAttendanceReport(dto: GetReportDto) {
+    const query: any = {
+      date: {
+        $gte: new Date(dto.startDate),
+        $lte: new Date(dto.endDate),
+      },
+    };
+
+    if (dto.employeeId) {
+      query.employeeId = new Types.ObjectId(dto.employeeId);
+    }
+
+    const records = await this.attendanceRecordModel
+      .find(query)
+      .populate('employeeId', 'firstName lastName fullName employeeNumber departmentId')
+      .sort({ date: -1 })
+      .exec();
+
+    // Summary statistics
+    const totalWorkMinutes = records.reduce((sum, r) => sum + (r.totalWorkMinutes || 0), 0);
+    const lateCount = records.filter(r => r.isLate).length;
+    const missedPunchCount = records.filter(r => r.hasMissedPunch).length;
+
+    return {
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      summary: {
+        totalRecords: records.length,
+        totalWorkMinutes,
+        totalWorkHours: Math.round(totalWorkMinutes / 60 * 100) / 100,
+        lateCount,
+        missedPunchCount,
+      },
+      data: records,
+    };
+  }
+
+  // ==================== CROSS-MODULE PLACEHOLDER (Story 15) ====================
+
+  async isEmployeeOnLeave(employeeId: string, date: Date): Promise<boolean> {
+    // Placeholder for cross-module integration with leave management
+    // This would query the leave management module to check if the employee has approved leave
+    // For now, returns false (not on leave)
+    console.log(`Checking if employee ${employeeId} is on leave on ${date.toDateString()}`);
+    return false;
+  }
+
+  // ==================== BACKGROUND JOBS (Stories 11, 16, 18) ====================
+
+  @Cron('0 9 * * 1') // Weekly on Monday at 9 AM
+  async flagRepeatedLateness() {
+    // Find employees with 3+ late arrivals in the past 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const lateRecords = await this.attendanceRecordModel.aggregate([
+      {
+        $match: {
+          date: { $gte: sevenDaysAgo },
+          isLate: true,
+        },
+      },
+      {
+        $group: {
+          _id: '$employeeId',
+          lateCount: { $sum: 1 },
+          dates: { $push: '$date' },
+        },
+      },
+      {
+        $match: {
+          lateCount: { $gte: 3 },
+        },
+      },
+    ]);
+
+    for (const record of lateRecords) {
+      await this.notificationLogModel.create({
+        type: 'REPEATED_LATENESS',
+        employeeId: record._id,
+        message: `Employee has been late ${record.lateCount} times in the past week`,
+        createdAt: new Date(),
+      });
+    }
+
+    console.log(`Flagged repeated lateness: ${lateRecords.length} employees with 3+ late arrivals`);
+  }
+
+  @Cron('0 0 * * *') // Daily at midnight
+  async syncToPayroll() {
+    // Sync finalized attendance records to payroll
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    const recordsToSync = await this.attendanceRecordModel.find({
+      date: yesterday,
+      finalisedForPayroll: true,
+    });
+
+    // Placeholder: In real implementation, this would call payroll module
+    console.log(`Syncing ${recordsToSync.length} attendance records to payroll for ${yesterday.toDateString()}`);
+
+    // Mark as synced (placeholder)
+    for (const record of recordsToSync) {
+      // Would update record with payroll sync timestamp
+      console.log(`Synced record for employee ${record.employeeId}`);
+    }
+  }
+
+  @Cron('0 9 * * *') // Daily at 9 AM
+  async escalatePendingRequests() {
+    // Find correction requests pending for more than 48 hours
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+    const pendingRequests = await this.correctionRequestModel.find({
+      status: CorrectionRequestStatus.SUBMITTED,
+      createdAt: { $lte: twoDaysAgo },
+    });
+
+    for (const request of pendingRequests) {
+      request.status = CorrectionRequestStatus.ESCALATED;
+      await request.save();
+
+      await this.notificationLogModel.create({
+        type: 'REQUEST_ESCALATED',
+        employeeId: request.employeeId,
+        message: 'Your correction request has been escalated due to pending approval for more than 48 hours',
+        createdAt: new Date(),
+      });
+    }
+
+    console.log(`Escalated ${pendingRequests.length} pending correction requests`);
   }
 }

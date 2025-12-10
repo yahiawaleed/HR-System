@@ -1,11 +1,11 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
   UseGuards,
   Request,
   ForbiddenException,
@@ -28,6 +28,11 @@ import {
   UpdatePunchPolicyDto,
   CreateCorrectionRequestDto,
   ReviewCorrectionDto,
+  CreateOvertimeRuleDto,
+  UpdateOvertimeRuleDto,
+  CreateLatenessRuleDto,
+  UpdateLatenessRuleDto,
+  GetReportDto,
 } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -39,7 +44,7 @@ import { SystemRole } from '../employee-profile/enums/employee-profile.enums';
 @Controller('time-management')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TimeManagementController {
-  constructor(private readonly timeManagementService: TimeManagementService) {}
+  constructor(private readonly timeManagementService: TimeManagementService) { }
 
   // ==================== SHIFT TYPES ====================
 
@@ -553,5 +558,181 @@ export class TimeManagementController {
   @ApiResponse({ status: 404, description: 'Correction request not found' })
   reviewCorrectionRequest(@Param('id') id: string, @Body() dto: ReviewCorrectionDto) {
     return this.timeManagementService.reviewCorrectionRequest(id, dto);
+  }
+
+  // ==================== OVERTIME RULES ====================
+
+  @Post('overtime-rules')
+  @Roles(SystemRole.SYSTEM_ADMIN, SystemRole.HR_ADMIN)
+  @ApiOperation({ summary: 'Create a new overtime rule' })
+  @ApiResponse({ status: 201, description: 'Overtime rule created successfully' })
+  createOvertimeRule(@Body() dto: CreateOvertimeRuleDto) {
+    return this.timeManagementService.createOvertimeRule(dto);
+  }
+
+  @Get('overtime-rules')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.HR_EMPLOYEE,
+    SystemRole.DEPARTMENT_HEAD,
+    SystemRole.DEPARTMENT_EMPLOYEE
+  )
+  @ApiOperation({ summary: 'Get all overtime rules' })
+  @ApiResponse({ status: 200, description: 'List of overtime rules' })
+  getOvertimeRules() {
+    return this.timeManagementService.getOvertimeRules();
+  }
+
+  @Get('overtime-rules/:id')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.HR_EMPLOYEE,
+    SystemRole.DEPARTMENT_HEAD,
+    SystemRole.DEPARTMENT_EMPLOYEE
+  )
+  @ApiOperation({ summary: 'Get overtime rule by ID' })
+  @ApiResponse({ status: 200, description: 'Overtime rule details' })
+  @ApiResponse({ status: 404, description: 'Overtime rule not found' })
+  getOvertimeRuleById(@Param('id') id: string) {
+    return this.timeManagementService.getOvertimeRuleById(id);
+  }
+
+  @Patch('overtime-rules/:id')
+  @Roles(SystemRole.SYSTEM_ADMIN, SystemRole.HR_ADMIN)
+  @ApiOperation({ summary: 'Update an overtime rule' })
+  @ApiResponse({ status: 200, description: 'Overtime rule updated successfully' })
+  @ApiResponse({ status: 404, description: 'Overtime rule not found' })
+  updateOvertimeRule(@Param('id') id: string, @Body() dto: UpdateOvertimeRuleDto) {
+    return this.timeManagementService.updateOvertimeRule(id, dto);
+  }
+
+  @Delete('overtime-rules/:id')
+  @Roles(SystemRole.SYSTEM_ADMIN)
+  @ApiOperation({ summary: 'Delete an overtime rule' })
+  @ApiResponse({ status: 200, description: 'Overtime rule deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Overtime rule not found' })
+  deleteOvertimeRule(@Param('id') id: string) {
+    return this.timeManagementService.deleteOvertimeRule(id);
+  }
+
+  // ==================== LATENESS RULES ====================
+
+  @Post('lateness-rules')
+  @Roles(SystemRole.SYSTEM_ADMIN, SystemRole.HR_ADMIN)
+  @ApiOperation({ summary: 'Create a new lateness rule' })
+  @ApiResponse({ status: 201, description: 'Lateness rule created successfully' })
+  createLatenessRule(@Body() dto: CreateLatenessRuleDto) {
+    return this.timeManagementService.createLatenessRule(dto);
+  }
+
+  @Get('lateness-rules')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.HR_EMPLOYEE,
+    SystemRole.DEPARTMENT_HEAD,
+    SystemRole.DEPARTMENT_EMPLOYEE
+  )
+  @ApiOperation({ summary: 'Get all lateness rules' })
+  @ApiResponse({ status: 200, description: 'List of lateness rules' })
+  getLatenessRules() {
+    return this.timeManagementService.getLatenessRules();
+  }
+
+  @Get('lateness-rules/:id')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.HR_EMPLOYEE,
+    SystemRole.DEPARTMENT_HEAD,
+    SystemRole.DEPARTMENT_EMPLOYEE
+  )
+  @ApiOperation({ summary: 'Get lateness rule by ID' })
+  @ApiResponse({ status: 200, description: 'Lateness rule details' })
+  @ApiResponse({ status: 404, description: 'Lateness rule not found' })
+  getLatenessRuleById(@Param('id') id: string) {
+    return this.timeManagementService.getLatenessRuleById(id);
+  }
+
+  @Patch('lateness-rules/:id')
+  @Roles(SystemRole.SYSTEM_ADMIN, SystemRole.HR_ADMIN)
+  @ApiOperation({ summary: 'Update a lateness rule' })
+  @ApiResponse({ status: 200, description: 'Lateness rule updated successfully' })
+  @ApiResponse({ status: 404, description: 'Lateness rule not found' })
+  updateLatenessRule(@Param('id') id: string, @Body() dto: UpdateLatenessRuleDto) {
+    return this.timeManagementService.updateLatenessRule(id, dto);
+  }
+
+  @Delete('lateness-rules/:id')
+  @Roles(SystemRole.SYSTEM_ADMIN)
+  @ApiOperation({ summary: 'Delete a lateness rule' })
+  @ApiResponse({ status: 200, description: 'Lateness rule deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Lateness rule not found' })
+  deleteLatenessRule(@Param('id') id: string) {
+    return this.timeManagementService.deleteLatenessRule(id);
+  }
+
+  // ==================== REPORTS (Story 17) ====================
+
+  @Post('reports/overtime')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.PAYROLL_MANAGER,
+    SystemRole.PAYROLL_SPECIALIST
+  )
+  @ApiOperation({ summary: 'Get overtime report for date range' })
+  @ApiResponse({ status: 200, description: 'Overtime report data' })
+  getOvertimeReport(@Body() dto: GetReportDto) {
+    return this.timeManagementService.getOvertimeReport(dto);
+  }
+
+  @Post('reports/lateness')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.PAYROLL_MANAGER,
+    SystemRole.PAYROLL_SPECIALIST
+  )
+  @ApiOperation({ summary: 'Get lateness report for date range' })
+  @ApiResponse({ status: 200, description: 'Lateness report data' })
+  getLatenessReport(@Body() dto: GetReportDto) {
+    return this.timeManagementService.getLatenessReport(dto);
+  }
+
+  @Post('reports/exceptions')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.PAYROLL_MANAGER,
+    SystemRole.PAYROLL_SPECIALIST
+  )
+  @ApiOperation({ summary: 'Get time exceptions report for date range' })
+  @ApiResponse({ status: 200, description: 'Time exceptions report data' })
+  getExceptionsReport(@Body() dto: GetReportDto) {
+    return this.timeManagementService.getExceptionsReport(dto);
+  }
+
+  @Post('reports/attendance')
+  @Roles(
+    SystemRole.SYSTEM_ADMIN,
+    SystemRole.HR_ADMIN,
+    SystemRole.HR_MANAGER,
+    SystemRole.PAYROLL_MANAGER,
+    SystemRole.PAYROLL_SPECIALIST
+  )
+  @ApiOperation({ summary: 'Get attendance report for date range' })
+  @ApiResponse({ status: 200, description: 'Attendance report data' })
+  getAttendanceReport(@Body() dto: GetReportDto) {
+    return this.timeManagementService.getAttendanceReport(dto);
   }
 }

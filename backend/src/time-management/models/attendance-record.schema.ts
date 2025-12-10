@@ -28,6 +28,12 @@ export class AttendanceRecord {
     @Prop({ default: false }) // to be computed after creating an instance
     hasMissedPunch: boolean;
 
+    @Prop({ default: false }) // to be computed based on arrival time vs scheduled shift start
+    isLate: boolean;
+
+    @Prop({ default: 0 }) // number of minutes late
+    lateMinutes: number;
+
     @Prop({ type: [Types.ObjectId], ref: 'TimeException', default: [] })
     exceptionIds: Types.ObjectId[];
 
