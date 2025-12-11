@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { JobRequisition } from './models/job-requisition.schema';
+import { JobTemplate } from './models/job-template.schema';
 import { Application } from './models/application.schema';
 import { Offer, OfferDocument } from './models/offer.schema';
 import { Onboarding } from './models/onboarding.schema';
@@ -13,6 +14,7 @@ import { OfferResponseStatus } from './enums/offer-response-status.enum';
 export class RecruitmentService {
     constructor(
         @InjectModel(JobRequisition.name) private jobModel: Model<JobRequisition>,
+        @InjectModel(JobTemplate.name) private jobTemplateModel: Model<JobTemplate>,
         @InjectModel(Application.name) private applicationModel: Model<Application>,
         @InjectModel(Offer.name) private offerModel: Model<Offer>,
         @InjectModel(Onboarding.name) private onboardingModel: Model<Onboarding>,
@@ -21,7 +23,26 @@ export class RecruitmentService {
     // --- JOB REQUISITIONS ---
 
     async createJob(createJobDto: any): Promise<JobRequisition> {
-        const newJob = new this.jobModel(createJobDto);
+        // 1. Create fields for Template
+        const templateData = {
+            title: createJobDto.title,
+            department: createJobDto.department,
+            qualifications: typeof createJobDto.qualifications === 'string' ? createJobDto.qualifications.split(',') : createJobDto.qualifications,
+            skills: typeof createJobDto.skills === 'string' ? createJobDto.skills.split(',') : createJobDto.skills,
+            description: createJobDto.description,
+        };
+
+        const newTemplate = new this.jobTemplateModel(templateData);
+        const savedTemplate = await newTemplate.save();
+
+        // 2. Create Requisition with link to Template
+        const requisitionData = {
+            ...createJobDto,
+            templateId: savedTemplate._id,
+            // defaults handled by schema if missing
+        };
+
+        const newJob = new this.jobModel(requisitionData);
         return newJob.save();
     }
 

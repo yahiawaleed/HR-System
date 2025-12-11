@@ -44,7 +44,7 @@ export class EmployeeProfile extends UserProfileBase {
   @Prop({ type: String })
   bankAccountNumber?: string;
 
-  
+
   @Prop({
     type: String,
     enum: Object.values(ContractType),
@@ -109,6 +109,13 @@ export class EmployeeProfile extends UserProfileBase {
 
   @Prop({ type: String })
   lastDevelopmentPlanSummary?: string;
+
+  // Lifecycle Flags
+  @Prop({ type: Boolean, default: false })
+  payrollEnabled: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  itAccessEnabled: boolean;
 }
 
 export const EmployeeProfileSchema =

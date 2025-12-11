@@ -4,19 +4,19 @@ import { HydratedDocument, Types } from 'mongoose';
 @Schema({ timestamps: true })
 export class JobRequisition {
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: () => `REQ-${Date.now()}` })
   requisitionId: string;
 
   @Prop({ type: Types.ObjectId, ref: 'JobTemplate' })
   templateId: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: 1 })
   openings: number;
 
   @Prop()
   location: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   hiringManagerId: Types.ObjectId;
 
   @Prop({

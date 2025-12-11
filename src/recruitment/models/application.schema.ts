@@ -6,14 +6,14 @@ import { ApplicationStatus } from '../enums/application-status.enum';
 @Schema({ timestamps: true })
 export class Application {
 
-  @Prop({ type: Types.ObjectId, ref: 'Candidate', required: true })
-  candidateId: Types.ObjectId;
+  @Prop({ type: String, required: false })
+  candidateId: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'JobRequisition', required: true })
-  requisitionId: Types.ObjectId;
+  @Prop({ type: String, required: false })
+  requisitionId: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  assignedHr?: Types.ObjectId;
+  @Prop({ type: String, required: false })
+  assignedHr?: string;
 
   @Prop({
     enum: ApplicationStage,

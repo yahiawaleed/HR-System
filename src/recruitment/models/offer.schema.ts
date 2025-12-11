@@ -7,14 +7,14 @@ import { ApprovalStatus } from '../enums/approval-status.enum';
 @Schema({ timestamps: true })
 export class Offer {
 
-  @Prop({ type: Types.ObjectId, ref: 'Application', required: true })
-  applicationId: Types.ObjectId;
+  @Prop({ type: String, required: true })
+  applicationId: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Candidate', required: true })
-  candidateId: Types.ObjectId;
+  @Prop({ type: String, required: true })
+  candidateId: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  hrEmployeeId: Types.ObjectId;
+  @Prop({ type: String })
+  hrEmployeeId: string;
 
   // COMPENSATION
   @Prop({ required: true })
