@@ -15,10 +15,19 @@ export const ClaimSchema = new Schema(
     description: { type: String },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
+      enum: ['PENDING_SPECIALIST', 'PENDING_MANAGER', 'APPROVED_FINANCE', 'REJECTED', 'REFUNDED'],
+      default: 'PENDING_SPECIALIST',
       index: true,
     },
+    approvalChain: [
+      {
+        approverId: { type: Schema.Types.ObjectId, ref: 'Employee' },
+        role: { type: String },
+        status: { type: String },
+        date: { type: Date, default: Date.now },
+        notes: { type: String },
+      }
+    ],
     submittedAt: { type: Date, default: Date.now },
     decisionAt: { type: Date },
     approverId: { type: Schema.Types.ObjectId, ref: 'Employee' },

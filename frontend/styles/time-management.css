@@ -1,0 +1,697 @@
+/* Time Management - Premium Design System with Enhanced Animations */
+
+/* ===== CSS Variables for Theming ===== */
+:root {
+  --tm-primary: #6366F1;
+  --tm-primary-light: #818CF8;
+  --tm-primary-dark: #4F46E5;
+  --tm-secondary: #EC4899;
+  --tm-accent-1: #14B8A6;
+  --tm-accent-2: #F59E0B;
+  --tm-accent-3: #8B5CF6;
+  --tm-success: #10B981;
+  --tm-warning: #F59E0B;
+  --tm-error: #EF4444;
+  --tm-info: #3B82F6;
+  --tm-gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  --tm-gradient-success: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
+  --tm-gradient-warm: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+  --tm-gradient-cool: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+  --tm-gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --tm-shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.1);
+  --tm-shadow-md: 0 4px 16px rgba(99, 102, 241, 0.15);
+  --tm-shadow-lg: 0 8px 32px rgba(99, 102, 241, 0.2);
+  --tm-shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(12px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 0; 
+    transform: translateY(-12px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideInLeft {
+  from { 
+    opacity: 0; 
+    transform: translateX(-20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes scaleInBounce {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+  50% { 
+    transform: scale(1.02); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 20px 5px rgba(99, 102, 241, 0.2);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(99, 102, 241, 0.3); }
+  50% { border-color: rgba(99, 102, 241, 0.6); }
+}
+
+@keyframes checkmark {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ===== Animation Classes ===== */
+.tm-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-slide-down {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-slide-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-slide-right {
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-scale-bounce {
+  animation: scaleInBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ===== Staggered Animation for Lists ===== */
+.tm-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.tm-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.tm-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.tm-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.tm-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.tm-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.tm-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.tm-stagger > *:nth-child(8) { animation-delay: 420ms; }
+.tm-stagger > *:nth-child(9) { animation-delay: 480ms; }
+.tm-stagger > *:nth-child(10) { animation-delay: 540ms; }
+
+/* ===== Hover Effects ===== */
+.tm-hover-lift {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--tm-shadow-lg);
+}
+
+.tm-hover-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-hover-glow:hover {
+  box-shadow: var(--tm-shadow-glow);
+}
+
+/* ===== Button Styles ===== */
+.tm-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.tm-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.tm-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.tm-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.tm-btn-gradient {
+  background: var(--tm-gradient-primary);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+/* ===== Table Styles ===== */
+.tm-table-row {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-table-row:hover {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.04) 0%, rgba(139, 92, 246, 0.04) 100%);
+}
+
+.tm-table-highlight {
+  position: relative;
+}
+
+.tm-table-highlight::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--tm-gradient-primary);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.tm-table-highlight:hover::after {
+  opacity: 1;
+}
+
+/* ===== Card Styles ===== */
+.tm-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.tm-card:hover {
+  box-shadow: var(--tm-shadow-lg);
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.tm-card-interactive {
+  cursor: pointer;
+}
+
+.tm-card-interactive:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ===== Glass Effect ===== */
+.tm-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.tm-glass-dark {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Loading States ===== */
+.tm-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+.tm-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.tm-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* ===== Icon Button Animation ===== */
+.tm-icon-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 10px;
+}
+
+.tm-icon-btn:hover {
+  transform: scale(1.12);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.tm-icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* ===== Chip Styles ===== */
+.tm-chip {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+}
+
+.tm-chip:hover {
+  transform: scale(1.05);
+  box-shadow: var(--tm-shadow-sm);
+}
+
+.tm-chip-animated {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* ===== Status Indicators ===== */
+.tm-status-dot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.tm-status-dot::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0.3;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.tm-status-active {
+  background: var(--tm-success);
+  color: var(--tm-success);
+}
+
+.tm-status-warning {
+  background: var(--tm-warning);
+  color: var(--tm-warning);
+}
+
+.tm-status-error {
+  background: var(--tm-error);
+  color: var(--tm-error);
+}
+
+/* ===== Smooth Scrollbar ===== */
+.tm-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tm-scrollbar::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-radius: 4px;
+}
+
+.tm-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #94a3b8 0%, #64748b 100%);
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.tm-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+}
+
+/* ===== Dialog Animation ===== */
+.tm-dialog {
+  animation: scaleInBounce 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-dialog-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ===== Spinner ===== */
+.tm-spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+.tm-spinner-pulse {
+  animation: spin 0.8s linear infinite, pulse 1s ease-in-out infinite;
+}
+
+/* ===== Progress Bar ===== */
+.tm-progress-bar {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: #e2e8f0;
+}
+
+.tm-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* ===== Stats Card ===== */
+.tm-stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  transform: translate(30%, -30%);
+}
+
+.tm-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--tm-shadow-lg);
+}
+
+.tm-stat-value {
+  animation: countUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Badge Styles ===== */
+.tm-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tm-badge-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tm-error);
+  border: 2px solid white;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ===== Time Display ===== */
+.tm-time-display {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  letter-spacing: 0.05em;
+}
+
+/* ===== Quick Action Buttons ===== */
+.tm-quick-action {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-quick-action::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tm-quick-action:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.tm-quick-action:hover {
+  transform: scale(1.05);
+  box-shadow: var(--tm-shadow-lg);
+}
+
+/* ===== Tooltip Enhancement ===== */
+.tm-tooltip {
+  animation: fadeInUp 0.2s ease-out;
+}
+
+/* ===== Tab Indicator ===== */
+.tm-tab-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Empty State ===== */
+.tm-empty-state {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.tm-empty-state-icon {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ===== Notification Bell ===== */
+.tm-notification-bell {
+  animation: none;
+  transition: transform 0.2s ease;
+}
+
+.tm-notification-bell.has-notifications {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.tm-notification-bell:hover {
+  transform: rotate(15deg);
+}
+
+/* ===== Avatar Group ===== */
+.tm-avatar-group > * {
+  transition: all 0.2s ease;
+  margin-left: -8px;
+}
+
+.tm-avatar-group > *:first-child {
+  margin-left: 0;
+}
+
+.tm-avatar-group:hover > * {
+  margin-left: 4px;
+}
+
+.tm-avatar-group > *:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+/* ===== Calendar Day ===== */
+.tm-calendar-day {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.tm-calendar-day:hover {
+  background: rgba(99, 102, 241, 0.1);
+  transform: scale(1.1);
+}
+
+.tm-calendar-day.selected {
+  background: var(--tm-gradient-primary);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: var(--tm-shadow-md);
+}
+
+/* ===== Responsive Animations ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== Focus States ===== */
+.tm-focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+}
+
+/* ===== Gradient Text ===== */
+.tm-gradient-text {
+  background: var(--tm-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== Border Animation ===== */
+.tm-border-animate {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+}
+
+.tm-border-animate::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  padding: 2px;
+  background: var(--tm-gradient-primary);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tm-border-animate:hover::before {
+  opacity: 1;
+}

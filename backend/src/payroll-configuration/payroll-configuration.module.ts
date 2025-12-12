@@ -1,30 +1,33 @@
 import { Module } from '@nestjs/common';
+import { PayrollConfigurationController } from './payroll-configuration.controller';
+import { PayrollConfigurationService } from './payroll-configuration.service';
+import { CompanyWideSettings, CompanyWideSettingsSchema } from './models/CompanyWideSettings.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PayrollConfigService } from './services/payroll-config.service';
-import { PayrollConfigController } from './controllers/payroll-config.controller';
-import { PayGradeSchema } from './schemas/pay-grade.schema';
-import { AllowanceSchema } from './schemas/allowance.schema';
-import { DeductionSchema } from './schemas/deduction.schema';
-import { TaxRuleSchema } from './schemas/tax-rule.schema';
-import { InsuranceRuleSchema } from './schemas/insurance-rule.schema';
-import { SigningBonusSchema } from './schemas/signing-bonus.schema';
-import { TerminationBenefitSchema } from './schemas/termination-benefit.schema';
+import { allowance, allowanceSchema } from './models/allowance.schema';
+import { insuranceBrackets, insuranceBracketsSchema } from './models/insuranceBrackets.schema';
+import { payrollPolicies, payrollPoliciesSchema } from './models/payrollPolicies.schema';
+import { payType, payTypeSchema } from './models/payType.schema';
+import { signingBonus, signingBonusSchema } from './models/signingBonus.schema';
+import { taxRules, taxRulesSchema } from './models/taxRules.schema';
+import { terminationAndResignationBenefits, terminationAndResignationBenefitsSchema } from './models/terminationAndResignationBenefits';
+import { payGrade } from './models/payGrades.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'PayGrade', schema: PayGradeSchema },
-      { name: 'Allowance', schema: AllowanceSchema },
-      { name: 'Deduction', schema: DeductionSchema },
-      { name: 'TaxRule', schema: TaxRuleSchema },
-      { name: 'InsuranceRule', schema: InsuranceRuleSchema },
-      { name: 'SigningBonus', schema: SigningBonusSchema },
-      { name: 'TerminationBenefit', schema: TerminationBenefitSchema },
+      { name: allowance.name, schema: allowanceSchema },
+      { name: signingBonus.name, schema: signingBonusSchema },
+      { name: taxRules.name, schema: taxRulesSchema },
+      { name: insuranceBrackets.name, schema: insuranceBracketsSchema },
+      { name: payType.name, schema: payTypeSchema },
+      { name: payrollPolicies.name, schema: payrollPoliciesSchema },
+      { name: terminationAndResignationBenefits.name, schema: terminationAndResignationBenefitsSchema },
+      { name: CompanyWideSettings.name, schema: CompanyWideSettingsSchema },
+      { name: payGrade.name, schema: payTypeSchema }
     ]),
   ],
-  controllers: [PayrollConfigController],
-  providers: [PayrollConfigService],
-  exports: [PayrollConfigService],
+  controllers: [PayrollConfigurationController],
+  providers: [PayrollConfigurationService],
+  exports:[PayrollConfigurationService]
 })
-export class PayrollConfigurationModule {}
-
+export class PayrollConfigurationModule { }
