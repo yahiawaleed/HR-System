@@ -1,160 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import {
-    Briefcase,
-    MapPin,
-    Clock,
-    DollarSign,
-    Search,
-    Filter
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardFooter
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-
-// Dummy data for jobs
-const jobs = [
-    {
-        id: 1,
-        title: "Senior Software Engineer",
-        department: "Engineering",
-        location: "Remote",
-        type: "Full-time",
-        salary: "$120k - $160k",
-        posted: "2 days ago",
-        description: "We are looking for an experienced Full Stack Engineer to join our core team...",
-        tags: ["React", "Node.js", "TypeScript"]
-    },
-    {
-        id: 2,
-        title: "Product Designer",
-        department: "Design",
-        location: "New York, NY",
-        type: "Full-time",
-        salary: "$90k - $130k",
-        posted: "1 week ago",
-        description: "Join our design team to craft beautiful and intuitive user experiences...",
-        tags: ["Figma", "UI/UX", "Prototyping"]
-    },
-    {
-        id: 3,
-        title: "Marketing Manager",
-        department: "Marketing",
-        location: "London, UK",
-        type: "Contract",
-        salary: "$80k - $100k",
-        posted: "3 days ago",
-        description: "Lead our marketing campaigns and drive growth across international markets...",
-        tags: ["SEO", "Content Strategy", "Analytics"]
-    },
-    {
-        id: 4,
-        title: "HR Coordinator",
-        department: "Human Resources",
-        location: "San Francisco, CA",
-        type: "Part-time",
-        salary: "$40k - $60k",
-        posted: "5 days ago",
-        description: "Assist with daily HR operations and recruitment processes...",
-        tags: ["Recruiting", "Employee Relations", "Admin"]
-    }
-];
+import { useEffect, useState } from 'react';
+import { JobsService, Job } from '@/services/jobs.service';
+import Link from 'next/link';
+import { Plus, Briefcase, MapPin, Clock } from 'lucide-react';
 
 export default function JobsPage() {
-    const [searchTerm, setSearchTerm] = useState("");
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const filteredJobs = jobs.filter(job =>
-        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.department.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    useEffect(() => {
+        loadJobs();
+    }, []);
+
+    const loadJobs = async () => {
+        try {
+            const data = await JobsService.findAll();
+            setJobs(data);
+        } catch (error) {
+            console.error("Failed to load jobs", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return <div className="p-8 text-center text-neutral-500">Loading jobs...</div>;
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                        Open Positions
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Find top talent to join your team.
-                    </p>
+                    <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Jobs</h1>
+                    <p className="text-neutral-500 mt-1">Manage open positions and requisitions.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline">
-                        <Filter className="mr-2 size-4" /> Filter
-                    </Button>
-                    <Button>
-                        <Briefcase className="mr-2 size-4" /> Post New Job
-                    </Button>
-                </div>
+                <Link href="/recruitment/jobs/create" className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" />
+                    <span>Create Job</span>
+                </Link>
             </div>
 
-            <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <input
-                    type="text"
-                    placeholder="Search by title or department..."
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredJobs.map((job) => (
-                    <Card key={job.id} className="group hover:shadow-lg transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm">
-                        <CardHeader>
+            <div className="grid gap-4">
+                {jobs.length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-xl border border-dashed border-neutral-300">
+                        <Briefcase className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+                        <h3 className="text-lg font-medium text-neutral-900">No jobs found</h3>
+                        <p className="text-neutral-500">Get started by creating a new job position.</p>
+                    </div>
+                ) : (
+                    jobs.map((job) => (
+                        <div key={job._id} className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow group">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-xs font-medium text-primary mb-2 uppercase tracking-wide">{job.department}</p>
-                                    <CardTitle className="text-xl group-hover:text-primary transition-colors">{job.title}</CardTitle>
+                                    <h3 className="text-xl font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors">{job.title}</h3>
+                                    <div className="flex items-center space-x-4 mt-2 text-sm text-neutral-500">
+                                        <span className="flex items-center space-x-1 bg-neutral-100 px-2.5 py-1 rounded-md text-neutral-600">
+                                            <Briefcase className="w-3.5 h-3.5" />
+                                            <span>{job.department}</span>
+                                        </span>
+                                        {/* Status badge - Assuming status exists, defaulting if not */}
+                                        <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${job.status === 'OPEN' ? 'bg-green-50 text-green-700 border-green-200' :
+                                            job.status === 'CLOSED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                'bg-neutral-50 text-neutral-700 border-neutral-200'
+                                            }`}>
+                                            {job.status || 'DRAFT'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <span className={cn(
-                                    "px-2 py-1 rounded-full text-xs font-medium",
-                                    job.type === "Full-time" ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400" :
-                                        job.type === "Contract" ? "bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400" :
-                                            "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
-                                )}>
-                                    {job.type}
-                                </span>
+                                <button className="text-sm font-medium text-neutral-400 hover:text-blue-600 p-2">
+                                    Edit
+                                </button>
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                                {job.description}
-                            </p>
-                            <div className="space-y-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                    <MapPin className="size-4" /> {job.location}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <DollarSign className="size-4" /> {job.salary}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className="size-4" /> Posted {job.posted}
-                                </div>
+                            <p className="mt-4 text-neutral-600 line-clamp-2">{job.description}</p>
+
+                            <div className="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-between">
+                                <span className="text-xs text-neutral-400">ID: {job._id}</span>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-4">
-                                {job.tags.map(tag => (
-                                    <span key={tag} className="px-2 py-1 bg-secondary rounded text-xs font-medium text-secondary-foreground">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button className="w-full" variant="secondary">View Details</Button>
-                        </CardFooter>
-                    </Card>
-                ))}
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

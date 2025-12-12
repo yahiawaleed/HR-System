@@ -99,6 +99,10 @@ export class RecruitmentService {
         return offer;
     }
 
+    async findAllOffers(): Promise<Offer[]> {
+        return this.offerModel.find().exec();
+    }
+
     // --- ONBOARDING ---
 
     private async triggerOnboarding(offer: OfferDocument) {

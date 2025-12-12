@@ -40,4 +40,9 @@ export class RecruitmentController {
     acceptOffer(@Param('id') id: string) {
         return this.recruitmentService.acceptOffer(id);
     }
+
+    @Get('offers')
+    findAllOffers() {
+        return this.recruitmentService.findAllOffers();
+    }
 }
