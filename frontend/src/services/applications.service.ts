@@ -36,5 +36,9 @@ export const ApplicationsService = {
     async updateStatus(id: string, status: string) {
         const response = await api.patch<Application>(`/recruitment/applications/${id}/status`, { status });
         return response.data;
+    },
+
+    async delete(id: string) {
+        await api.delete(`/recruitment/applications/${id}`);
     }
 };

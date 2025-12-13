@@ -27,5 +27,14 @@ export const JobsService = {
     async create(data: CreateJobDto) {
         const response = await api.post<Job>('/recruitment/jobs', data);
         return response.data;
+    },
+
+    async findById(id: string) {
+        const response = await api.get<Job>(`/recruitment/jobs/${id}`);
+        return response.data;
+    },
+
+    async delete(id: string) {
+        await api.delete(`/recruitment/jobs/${id}`);
     }
 };

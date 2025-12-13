@@ -24,6 +24,17 @@ export default function JobsPage() {
         }
     };
 
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this job?")) return;
+        try {
+            await JobsService.delete(id);
+            setJobs(prev => prev.filter(j => j._id !== id));
+        } catch (error) {
+            console.error("Failed to delete job", error);
+            alert("Failed to delete job");
+        }
+    };
+
     if (loading) return <div className="p-8 text-center text-neutral-500">Loading jobs...</div>;
 
     return (
@@ -66,9 +77,14 @@ export default function JobsPage() {
                                         </span>
                                     </div>
                                 </div>
-                                <button className="text-sm font-medium text-neutral-400 hover:text-blue-600 p-2">
-                                    Edit
-                                </button>
+                                <div className="flex items-center space-x-2">
+                                    <Link href={`/recruitment/jobs/${job._id}`} className="text-sm font-medium text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-lg transition-colors">
+                                        View
+                                    </Link>
+                                    <button onClick={() => handleDelete(job._id)} className="text-sm font-medium text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors">
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                             <p className="mt-4 text-neutral-600 line-clamp-2">{job.description}</p>
 
