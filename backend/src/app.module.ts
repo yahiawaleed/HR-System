@@ -13,6 +13,7 @@ import { OrganizationStructureModule } from './organization-structure/organizati
 import { PerformanceModule } from './performance/performance.module';
 import { PayrollConfigurationModule } from './payroll-configuration/payroll-configuration.module';
 import { PayrollExecutionModule } from './payroll-execution/payroll-execution.module';
+import { PayrollProcessingModule } from './payroll-processing/payroll-processing.module';
 import { AuthModule } from './auth/auth.module';
 import { NotificationModule } from './notification/notification.module';
 
@@ -30,6 +31,7 @@ import { NotificationModule } from './notification/notification.module';
     RecruitmentModule,
     LeavesModule,
     PayrollExecutionModule,
+    PayrollProcessingModule,
     PayrollConfigurationModule,
     PayrollTrackingModule,
     EmployeeProfileModule,

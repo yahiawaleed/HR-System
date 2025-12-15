@@ -1,24 +1,13 @@
 {
-  "name": "hr-system",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "HR Management System - Full Stack Application",
-  "private": true,
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run start:dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "cd backend && npm run build",
-    "build:frontend": "cd frontend && npm run build",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
-    "start:backend": "cd backend && npm run start:prod",
-    "start:frontend": "cd frontend && npm run start",
-    "seed:roles": "cd backend && npm run seed:roles",
-    "test:backend": "cd backend && npm run test",
-    "test:frontend": "cd frontend && npm run test"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
