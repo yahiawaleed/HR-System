@@ -2,8 +2,8 @@ services:
   - type: web
     name: hr-system-backend
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:prod
+    buildCommand: npm install --production=false && NODE_OPTIONS="--max-old-space-size=512" npm run build
+    startCommand: node dist/main.js
     envVars:
       - key: NODE_ENV
         value: production
