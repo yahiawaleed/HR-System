@@ -7,9 +7,9 @@ const BASE_URL =
 
 export async function PATCH(
   request: Request,
-  context: { params: { endpoint: string; id: string; action: string } }
+  { params }: { params: Promise<{ endpoint: string; id: string; action: string }> }
 ) {
-  const { endpoint, id, action } = context.params;
+  const { endpoint, id, action } = await params;
   const body = await request.json();
 
   const res = await fetch(`${BASE_URL}/${endpoint}/${id}/${action}`, {

@@ -20,7 +20,6 @@ import {
   Alert,
   IconButton,
   InputAdornment,
-  Grid,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -150,9 +149,9 @@ export default function PayTypesPage() {
 
       {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
 
-      <Grid container spacing={4}>
+      <Box sx={{ display: 'flex', gap: 4, flexDirection: { xs: 'column', lg: 'row' } }}>
         {/* Create Form */}
-        <Grid item xs={12} lg={4}>
+        <Box sx={{ flex: { xs: '1 1 100%', lg: '0 0 33%' } }}>
           <Card sx={{ borderRadius: 4, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -204,10 +203,10 @@ export default function PayTypesPage() {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
         {/* List Table */}
-        <Grid item xs={12} lg={8}>
+        <Box sx={{ flex: { xs: '1 1 100%', lg: '0 0 66%' } }}>
           <Card sx={{ borderRadius: 4, height: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
@@ -284,8 +283,8 @@ export default function PayTypesPage() {
               )}
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
     </Box>
   );
 }

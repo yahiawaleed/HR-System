@@ -83,14 +83,14 @@ export default function ChangeRequestDetailPage() {
                 <Box mb={3}>
                     <Typography variant="caption" color="text.secondary">Employee</Typography>
                     <Typography variant="body1" fontWeight="bold">
-                        {request?.employee?.fullName || 'N/A'}
+                        {typeof request?.employeeProfileId === 'object' ? request.employeeProfileId.fullName : 'N/A'}
                     </Typography>
                 </Box>
 
                 <Box mb={3}>
                     <Typography variant="caption" color="text.secondary">Employee Number</Typography>
                     <Typography variant="body1">
-                        {request?.employee?.employeeNumber || 'N/A'}
+                        {typeof request?.employeeProfileId === 'object' ? request.employeeProfileId.employeeNumber : 'N/A'}
                     </Typography>
                 </Box>
 

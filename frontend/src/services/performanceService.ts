@@ -101,6 +101,7 @@ export interface CreateTemplateData {
 export interface CreateCycleData {
     name: string;
     description?: string;
+    cycleType?: string;
     startDate: string;
     endDate: string;
 }

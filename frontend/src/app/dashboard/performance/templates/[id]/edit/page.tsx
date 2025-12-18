@@ -32,6 +32,13 @@ export default function EditTemplatePage() {
     const [formData, setFormData] = useState<CreateTemplateData>({
         name: '',
         description: '',
+        templateType: 'STANDARD',
+        ratingScale: {
+            type: 'NUMERIC',
+            min: 1,
+            max: 5,
+            labels: [],
+        },
         sections: [],
     });
 
@@ -45,6 +52,13 @@ export default function EditTemplatePage() {
             setFormData({
                 name: template.name,
                 description: template.description || '',
+                templateType: 'STANDARD',
+                ratingScale: {
+                    type: 'NUMERIC',
+                    min: 1,
+                    max: 5,
+                    labels: [],
+                },
                 sections: template.sections.map((s: any) => ({
                     title: s.title,
                     description: s.description || '',
