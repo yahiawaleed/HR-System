@@ -13,6 +13,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { LeavesService } from './leaves.service';
+import { CreateLeaveEntitlementDto } from './dto/create-leave-entitlement.dto';
+import { LeaveEntitlement } from './models/leave-entitlement.schema';
 import { CreateLeaveRequestDto } from './dto/create-leave-request.dto';
 import { UpdateLeaveRequestDto } from './dto/update-leave-request.dto';
 import { CreateLeaveTypeDto } from './dto/create-leave-type.dto';
@@ -25,7 +27,7 @@ import { LeavePolicy } from './models/leave-policy.schema';
 @Controller('leaves')
 @UsePipes(new ValidationPipe({ transform: true }))
 export class LeavesController {
-  constructor(private readonly leavesService: LeavesService) {}
+  constructor(private readonly leavesService: LeavesService) { }
 
   // Leave Requests Endpoints
   @Post('requests')
@@ -101,6 +103,13 @@ export class LeavesController {
   @Get('policies')
   async findAllLeavePolicies(): Promise<LeavePolicy[]> {
     return await this.leavesService.findAllLeavePolicies();
+  }
+
+  // Entitlement Endpoints
+  @Post('entitlements')
+  @HttpCode(HttpStatus.CREATED)
+  async createEntitlement(@Body() dto: CreateLeaveEntitlementDto): Promise<LeaveEntitlement> {
+    return await this.leavesService.createEntitlement(dto);
   }
 
   // Balance Endpoints

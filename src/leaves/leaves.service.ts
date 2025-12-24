@@ -12,6 +12,7 @@ import { UpdateLeaveRequestDto } from './dto/update-leave-request.dto';
 import { CreateLeaveTypeDto } from './dto/create-leave-type.dto';
 import { CreateLeavePolicyDto } from './dto/create-leave-policy.dto';
 import { ApproveLeaveRequestDto } from './dto/approve-leave-request.dto';
+import { CreateLeaveEntitlementDto } from './dto/create-leave-entitlement.dto';
 
 @Injectable()
 export class LeavesService {
@@ -21,7 +22,7 @@ export class LeavesService {
     @InjectModel(LeavePolicy.name) private leavePolicyModel: Model<LeavePolicyDocument>,
     @InjectModel(LeaveEntitlement.name) private leaveEntitlementModel: Model<LeaveEntitlementDocument>,
     @InjectModel(Calendar.name) private calendarModel: Model<CalendarDocument>,
-  ) {}
+  ) { }
 
   // Leave Request Methods
   async createLeaveRequest(createLeaveRequestDto: CreateLeaveRequestDto): Promise<LeaveRequest> {
@@ -45,6 +46,10 @@ export class LeavesService {
 
     const leaveRequest = new this.leaveRequestModel({
       ...createLeaveRequestDto,
+      dates: {
+        from: createLeaveRequestDto.fromDate,
+        to: createLeaveRequestDto.toDate,
+      },
       status: LeaveStatus.PENDING,
       employeeId: new Types.ObjectId(createLeaveRequestDto.employeeId),
       leaveTypeId: new Types.ObjectId(createLeaveRequestDto.leaveTypeId),
@@ -67,7 +72,7 @@ export class LeavesService {
       .populate('leaveTypeId')
       .populate('employeeId')
       .exec();
-    
+
     if (!leaveRequest) {
       throw new NotFoundException('Leave request not found');
     }
@@ -76,7 +81,7 @@ export class LeavesService {
 
   async updateLeaveRequest(id: string, updateLeaveRequestDto: UpdateLeaveRequestDto): Promise<LeaveRequest> {
     const leaveRequest = await this.findLeaveRequestById(id);
-    
+
     if (leaveRequest.status !== LeaveStatus.PENDING) {
       throw new BadRequestException('Cannot update leave request that is not pending');
     }
@@ -84,7 +89,7 @@ export class LeavesService {
     const updated = await this.leaveRequestModel
       .findByIdAndUpdate(id, updateLeaveRequestDto, { new: true })
       .exec();
-    
+
     if (!updated) {
       throw new NotFoundException('Leave request not found');
     }
@@ -93,7 +98,7 @@ export class LeavesService {
 
   async deleteLeaveRequest(id: string): Promise<void> {
     const leaveRequest = await this.findLeaveRequestById(id);
-    
+
     if (leaveRequest.status !== LeaveStatus.PENDING) {
       throw new BadRequestException('Cannot delete leave request that is not pending');
     }
@@ -106,11 +111,35 @@ export class LeavesService {
 
   async approveLeaveRequest(id: string, approveDto: ApproveLeaveRequestDto): Promise<LeaveRequest> {
     const leaveRequest = await this.findLeaveRequestById(id);
-    
+
     if (leaveRequest.status !== LeaveStatus.PENDING) {
       throw new BadRequestException('Leave request is not pending approval');
     }
 
+    // 1. Deduct Balance FIRST (if approving)
+    if (approveDto.status === LeaveStatus.APPROVED) {
+      // Fetch raw document to get IDs even if referenced documents don't exist (Mock Data support)
+      const rawRequest = await this.leaveRequestModel.findById(id).exec();
+
+      if (!rawRequest) {
+        throw new NotFoundException('Leave request not found');
+      }
+
+      const empId = rawRequest.employeeId;
+      const typeId = rawRequest.leaveTypeId;
+
+      if (!empId || !typeId) {
+        throw new BadRequestException('Invalid reference data: Employee or Leave Type missing in request.');
+      }
+
+      await this.deductLeaveBalance(
+        empId.toString(),
+        typeId.toString(),
+        leaveRequest.durationDays,
+      );
+    }
+
+    // 2. Prepare Update
     const updateData: any = {
       status: approveDto.status,
       managerComments: approveDto.comments,
@@ -120,6 +149,7 @@ export class LeavesService {
       updateData.approvedByManagerId = new Types.ObjectId(approveDto.approverId);
     }
 
+    // 3. Update Status
     const updated = await this.leaveRequestModel.findByIdAndUpdate(
       id,
       updateData,
@@ -130,20 +160,12 @@ export class LeavesService {
       throw new NotFoundException('Leave request not found after update');
     }
 
-    if (approveDto.status === LeaveStatus.APPROVED) {
-      await this.deductLeaveBalance(
-        leaveRequest.employeeId.toString(),
-        leaveRequest.leaveTypeId.toString(),
-        leaveRequest.durationDays,
-      );
-    }
-
     return updated;
   }
 
   async hrReviewLeaveRequest(id: string, approveDto: ApproveLeaveRequestDto): Promise<LeaveRequest> {
     const leaveRequest = await this.findLeaveRequestById(id);
-    
+
     if (leaveRequest.status !== LeaveStatus.APPROVED) {
       throw new BadRequestException('Leave request must be approved by manager first');
     }
@@ -247,50 +269,69 @@ export class LeavesService {
 
     const used = approvedLeaves.reduce((sum, leave) => sum + leave.durationDays, 0);
     const pendingRequests = pendingLeaves.reduce((sum, leave) => sum + leave.durationDays, 0);
-    
+
     // Total = yearly entitlement + carry forward + accrued rounded
     const total = yearlyEntitlement + carryForward + accruedRounded;
     const available = total - taken - pendingRequests;
 
-    return { 
+    return {
       employeeId,
       leaveTypeId,
       yearlyEntitlement,
       carryForward,
       accruedRounded,
-      total, 
-      used: taken, 
-      pending: pendingRequests, 
+      total,
+      used: taken,
+      pending: pendingRequests,
       available,
       lastAccrualDate,
       nextResetDate
     };
   }
 
-  private async deductLeaveBalance(employeeId: string, leaveTypeId: string, days: number): Promise<void> {
-    try {
-      const entitlement = await this.leaveEntitlementModel.findOne({
-        employeeId: new Types.ObjectId(employeeId),
-        leaveTypeId: new Types.ObjectId(leaveTypeId),
-      }).exec();
+  async createEntitlement(dto: CreateLeaveEntitlementDto): Promise<LeaveEntitlement> {
+    const existing = await this.leaveEntitlementModel.findOne({
+      employeeId: new Types.ObjectId(dto.employeeId),
+      leaveTypeId: new Types.ObjectId(dto.leaveTypeId),
+    });
 
-      if (entitlement) {
-        // Update taken and recalculate remaining
-        entitlement.taken += days;
-        entitlement.remaining = Math.max(0, 
-          (entitlement.yearlyEntitlement + entitlement.carryForward + entitlement.accruedRounded) 
-          - entitlement.taken 
-          - entitlement.pending
-        );
-        
-        await entitlement.save();
-        console.log(`Successfully deducted ${days} days from employee ${employeeId}`);
-      } else {
-        console.warn(`No entitlement found for employee ${employeeId} and leave type ${leaveTypeId}`);
-      }
-    } catch (error) {
-      console.error('Error deducting leave balance:', error);
-      throw new Error('Failed to deduct leave balance');
+    if (existing) {
+      existing.yearlyEntitlement = dto.totalDays;
+      existing.remaining = (existing.yearlyEntitlement + existing.carryForward + existing.accruedRounded)
+        - existing.taken
+        - existing.pending;
+      return await existing.save();
+    }
+
+    const entitlement = new this.leaveEntitlementModel({
+      employeeId: new Types.ObjectId(dto.employeeId),
+      leaveTypeId: new Types.ObjectId(dto.leaveTypeId),
+      yearlyEntitlement: dto.totalDays,
+      remaining: dto.totalDays,
+    });
+    return await entitlement.save();
+  }
+
+  private async deductLeaveBalance(employeeId: string, leaveTypeId: string, days: number): Promise<void> {
+    const entitlement = await this.leaveEntitlementModel.findOne({
+      employeeId: new Types.ObjectId(employeeId),
+      leaveTypeId: new Types.ObjectId(leaveTypeId),
+    }).exec();
+
+    if (entitlement) {
+      // Update taken and recalculate remaining
+      entitlement.taken += days;
+      entitlement.remaining = Math.max(0,
+        (entitlement.yearlyEntitlement + entitlement.carryForward + entitlement.accruedRounded)
+        - entitlement.taken
+        - entitlement.pending
+      );
+
+      await entitlement.save();
+      console.log(`Successfully deducted ${days} days from employee ${employeeId}`);
+    } else {
+      console.warn(`No entitlement found for employee ${employeeId} and leave type ${leaveTypeId}`);
+      throw new NotFoundException(`No leave entitlement found. Please assign entitlement for this leave type in Admin panel.`);
     }
   }
 

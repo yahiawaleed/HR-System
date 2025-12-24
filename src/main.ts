@@ -12,7 +12,8 @@ async function bootstrap() {
   // Create NestJS application instance using AppModule (the root module)
   // AppModule connects all features together (time-management, recruitment, etc.)
   const app = await NestFactory.create(AppModule);
-  
+  app.enableCors(); // Enable CORS for frontend communication
+
   // Start the server and listen on port 3000 (or PORT from environment variables)
   // Your API will be available at: http://localhost:3000
   await app.listen(process.env.PORT ?? 3000);
