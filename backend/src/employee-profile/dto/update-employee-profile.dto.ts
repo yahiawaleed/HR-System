@@ -12,4 +12,7 @@ export class UpdateEmployeeProfileDto extends PartialType(CreateEmployeeProfileD
   @IsOptional()
   @IsEnum(EmployeeStatus)
   status?: EmployeeStatus;
+
+  @IsOptional()
+  biography?: string;
 }

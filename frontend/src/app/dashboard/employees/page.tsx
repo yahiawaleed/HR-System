@@ -18,6 +18,10 @@ import {
     Button,
     Chip,
     IconButton,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@mui/material';
 import { Add, Edit, Visibility } from '@mui/icons-material';
 import Link from 'next/link';
@@ -26,10 +30,11 @@ export default function EmployeesPage() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [search, setSearch] = useState('');
+    const [status, setStatus] = useState('');
 
     const { data, isLoading, error } = useQuery({
-        queryKey: ['employees', page + 1, rowsPerPage, search],
-        queryFn: () => employeeService.getAll(page + 1, rowsPerPage, search),
+        queryKey: ['employees', page + 1, rowsPerPage, search, status],
+        queryFn: () => employeeService.getAll(page + 1, rowsPerPage, search, status),
     });
 
     const handleChangePage = (_event: unknown, newPage: number) => {
@@ -74,14 +79,33 @@ export default function EmployeesPage() {
             </Box>
 
             <Paper sx={{ mb: 2, p: 2 }}>
-                <TextField
-                    fullWidth
-                    label="Search"
-                    variant="outlined"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search by name, email, or employee number"
-                />
+                <Box display="flex" gap={2}>
+                    <TextField
+                        label="Search"
+                        variant="outlined"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search by name, email, or employee number"
+                        sx={{ flexGrow: 1 }}
+                    />
+                    <FormControl sx={{ minWidth: 200 }}>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            value={status}
+                            label="Status"
+                            onChange={(e) => {
+                                setStatus(e.target.value);
+                                setPage(0);
+                            }}
+                        >
+                            <MenuItem value="">All Statuses</MenuItem>
+                            <MenuItem value="ACTIVE">Active</MenuItem>
+                            <MenuItem value="SUSPENDED">Suspended</MenuItem>
+                            <MenuItem value="TERMINATED">Terminated</MenuItem>
+                            <MenuItem value="RETIRED">Retired</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Box>
             </Paper>
 
             <TableContainer component={Paper}>

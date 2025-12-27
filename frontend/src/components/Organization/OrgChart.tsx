@@ -37,7 +37,7 @@ interface OrgChartProps {
 // Custom node component
 const CustomNode = ({ data }: any) => {
     const profilePictureUrl = data.profilePictureUrl
-        ? `${API_BASE_URL}${data.profilePictureUrl}`
+        ? `${API_BASE_URL}/api/employee-profile${data.profilePictureUrl}`
         : undefined;
 
     return (

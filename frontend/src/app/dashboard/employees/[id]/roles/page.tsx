@@ -23,13 +23,17 @@ import { ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
 
 const AVAILABLE_ROLES = [
-    'HR Admin',
+    'Department Employee',
+    'Department Head',
     'HR Manager',
     'HR Employee',
-    'Recruiter',
-    'Department Head',
+    'Payroll Specialist',
     'Payroll Manager',
     'System Admin',
+    'Legal & Policy Admin',
+    'Recruiter',
+    'Finance Staff',
+    'HR Admin',
 ];
 
 export default function RolesPage() {

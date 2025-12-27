@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { employeeService } from '@/services/employeeService';
+import { API_BASE_URL } from '@/services/api';
 import {
     Box,
     Typography,
@@ -21,6 +22,7 @@ import {
     Select,
     FormControl,
     InputLabel,
+    Avatar,
 } from '@mui/material';
 import { ArrowBack, PictureAsPdf, PersonOff } from '@mui/icons-material';
 import Link from 'next/link';
@@ -30,6 +32,7 @@ export default function EmployeeDetailPage() {
     const router = useRouter();
     const employeeId = params.id as string;
     const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deactivateStatus, setDeactivateStatus] = useState('');
 
     const { data: employee, isLoading, refetch } = useQuery({
@@ -43,6 +46,14 @@ export default function EmployeeDetailPage() {
         onSuccess: () => {
             setDeactivateDialogOpen(false);
             refetch();
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: () => employeeService.deletePermanently(employeeId),
+        onSuccess: () => {
+            setDeleteDialogOpen(false);
+            router.push('/dashboard/employees');
         },
     });
 
@@ -83,6 +94,12 @@ export default function EmployeeDetailPage() {
                     >
                         Back
                     </Button>
+                    <Avatar
+                        src={employee?.profilePictureUrl ? `${API_BASE_URL}/api/employee-profile${employee.profilePictureUrl}` : undefined}
+                        sx={{ width: 64, height: 64, mr: 2 }}
+                    >
+                        {employee?.firstName?.[0]}{employee?.lastName?.[0]}
+                    </Avatar>
                     <Typography variant="h4">{employee?.fullName}</Typography>
                 </Box>
                 <Box display="flex" gap={2}>
@@ -93,7 +110,7 @@ export default function EmployeeDetailPage() {
                     >
                         Export PDF
                     </Button>
-                    {employee?.status === 'ACTIVE' && (
+                    {employee?.status === 'ACTIVE' ? (
                         <Button
                             variant="outlined"
                             color="error"
@@ -101,6 +118,15 @@ export default function EmployeeDetailPage() {
                             onClick={() => setDeactivateDialogOpen(true)}
                         >
                             Deactivate
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<PersonOff />}
+                            onClick={() => setDeleteDialogOpen(true)}
+                        >
+                            Delete Permanently
                         </Button>
                     )}
                 </Box>
@@ -238,6 +264,29 @@ export default function EmployeeDetailPage() {
                         disabled={!deactivateStatus || deactivateMutation.isPending}
                     >
                         {deactivateMutation.isPending ? 'Deactivating...' : 'Deactivate'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            {/* Permanent Delete Dialog */}
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>Delete Employee Permanently</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+                        WARNING: This action is irreversible. All records belonging to this employee will be deleted forever.
+                    </Typography>
+                    <Typography variant="body2">
+                        Are you absolutely sure you want to delete <strong>{employee?.fullName}</strong>?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+                    <Button
+                        onClick={() => deleteMutation.mutate()}
+                        color="error"
+                        variant="contained"
+                        disabled={deleteMutation.isPending}
+                    >
+                        {deleteMutation.isPending ? 'Deleting...' : 'Permanently Delete'}
                     </Button>
                 </DialogActions>
             </Dialog>

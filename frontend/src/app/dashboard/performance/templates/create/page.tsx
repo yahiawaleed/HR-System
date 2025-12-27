@@ -90,7 +90,8 @@ export default function CreateTemplatePage() {
     const addCriteria = (sectionIndex: number) => {
         const newSections = [...formData.sections];
         newSections[sectionIndex].criteria.push({
-            name: '',
+            key: '',
+            title: '',
             description: '',
             weight: 0,
             type: 'RATING',
@@ -111,10 +112,14 @@ export default function CreateTemplatePage() {
         value: any
     ) => {
         const newSections = [...formData.sections];
-        newSections[sectionIndex].criteria[criteriaIndex] = {
-            ...newSections[sectionIndex].criteria[criteriaIndex],
-            [field]: value,
-        };
+        const criteria = { ...newSections[sectionIndex].criteria[criteriaIndex], [field]: value };
+
+        // Auto-generate key from title if not manually edited and we're editing title
+        if (field === 'title' && !criteria.key) {
+            criteria.key = value.toLowerCase().replace(/\s+/g, '_');
+        }
+
+        newSections[sectionIndex].criteria[criteriaIndex] = criteria;
         setFormData({ ...formData, sections: newSections });
     };
 
@@ -191,23 +196,21 @@ export default function CreateTemplatePage() {
                             />
                         </Grid>
                         <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField
-                                select
-                                fullWidth
-                                required
-                                label="Template Type"
-                                name="templateType"
-                                value={formData.templateType}
-                                onChange={handleBasicChange}
-                                SelectProps={{ native: true }}
-                            >
-                                <option value="" disabled>Select Type</option>
-                                <option value="ANNUAL">Annual</option>
-                                <option value="SEMI_ANNUAL">Semi-Annual</option>
-                                <option value="PROBATIONARY">Probationary</option>
-                                <option value="PROJECT">Project</option>
-                                <option value="AD_HOC">Ad-Hoc</option>
-                            </TextField>
+                            <FormControl fullWidth required>
+                                <InputLabel>Template Type</InputLabel>
+                                <Select
+                                    name="templateType"
+                                    value={formData.templateType}
+                                    label="Template Type"
+                                    onChange={(e) => setFormData({ ...formData, templateType: e.target.value })}
+                                >
+                                    <MenuItem value="ANNUAL">Annual</MenuItem>
+                                    <MenuItem value="SEMI_ANNUAL">Semi-Annual</MenuItem>
+                                    <MenuItem value="PROBATIONARY">Probationary</MenuItem>
+                                    <MenuItem value="PROJECT">Project</MenuItem>
+                                    <MenuItem value="AD_HOC">Ad-Hoc</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Grid size={{ xs: 12 }}>
                             <TextField
@@ -224,19 +227,18 @@ export default function CreateTemplatePage() {
                         </Grid>
 
                         <Grid size={{ xs: 12, md: 4 }}>
-                            <TextField
-                                select
-                                fullWidth
-                                required
-                                label="Scale Type"
-                                value={formData.ratingScale.type}
-                                onChange={(e) => handleRatingScaleChange('type', e.target.value)}
-                                SelectProps={{ native: true }}
-                            >
-                                <option value="THREE_POINT">3-Point</option>
-                                <option value="FIVE_POINT">5-Point</option>
-                                <option value="TEN_POINT">10-Point</option>
-                            </TextField>
+                            <FormControl fullWidth required>
+                                <InputLabel>Scale Type</InputLabel>
+                                <Select
+                                    value={formData.ratingScale.type}
+                                    label="Scale Type"
+                                    onChange={(e) => handleRatingScaleChange('type', e.target.value)}
+                                >
+                                    <MenuItem value="THREE_POINT">3-Point</MenuItem>
+                                    <MenuItem value="FIVE_POINT">5-Point</MenuItem>
+                                    <MenuItem value="TEN_POINT">10-Point</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Grid size={{ xs: 6, md: 4 }}>
                             <TextField
@@ -323,14 +325,24 @@ export default function CreateTemplatePage() {
 
                                     {section.criteria.map((criteria, cIndex) => (
                                         <Grid container spacing={2} key={cIndex} alignItems="center" mb={1}>
-                                            <Grid size={{ xs: 12, md: 4 }}>
+                                            <Grid size={{ xs: 12, md: 2 }}>
                                                 <TextField
                                                     fullWidth
                                                     size="small"
                                                     required
-                                                    label="Criteria Name"
-                                                    value={criteria.name}
-                                                    onChange={(e) => handleCriteriaChange(sIndex, cIndex, 'name', e.target.value)}
+                                                    label="Key"
+                                                    value={criteria.key}
+                                                    onChange={(e) => handleCriteriaChange(sIndex, cIndex, 'key', e.target.value)}
+                                                />
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 3 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    required
+                                                    label="Title"
+                                                    value={criteria.title}
+                                                    onChange={(e) => handleCriteriaChange(sIndex, cIndex, 'title', e.target.value)}
                                                 />
                                             </Grid>
                                             <Grid size={{ xs: 12, md: 3 }}>

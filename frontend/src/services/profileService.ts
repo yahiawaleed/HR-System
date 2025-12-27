@@ -25,6 +25,13 @@ export interface UserProfile {
     bankAccountNumber?: string;
     biography?: string;
     profilePictureUrl?: string;
+    address?: Address | string;
+}
+
+export interface Address {
+    city?: string;
+    streetAddress?: string;
+    country?: string;
 }
 
 export const profileService = {

@@ -12,7 +12,7 @@ import { UpdatePositionDto } from './dto/update-position.dto';
 import { AssignPositionDto } from './dto/assign-position.dto';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../notification/models/notification.schema';
-import { StructureRequestStatus } from './enums/organization-structure.enums';
+import { StructureRequestStatus, StructureRequestType } from './enums/organization-structure.enums';
 
 @Injectable()
 export class OrganizationStructureService {
@@ -126,16 +126,70 @@ export class OrganizationStructureService {
 
     async approveChangeRequest(id: string): Promise<any> {
         try {
-            const updated = await this.structureChangeRequestModel.findByIdAndUpdate(
-                id,
-                { status: 'APPROVED', approvedAt: new Date() },
-                { new: true, runValidators: true }
-            ).exec();
-
-            if (!updated) {
+            const request = await this.structureChangeRequestModel.findById(id).exec();
+            if (!request) {
                 throw new NotFoundException(`Change Request with ID ${id} not found`);
             }
-            console.log(`[APPROVE] Successfully updated request ${id} to APPROVED`);
+
+            if (request.status === StructureRequestStatus.APPROVED || request.status === StructureRequestStatus.IMPLEMENTED) {
+                return request; // Already processed
+            }
+
+            // --- Execute the Change ---
+            let details: any = {};
+            try {
+                details = typeof request.details === 'string' ? JSON.parse(request.details) : request.details;
+            } catch (e) {
+                console.warn(`[APPROVE] Could not parse details for request ${id}:`, e.message);
+            }
+
+            if (request.requestType === StructureRequestType.NEW_POSITION) {
+                // Generate unique code if not provided
+                const count = await this.positionModel.countDocuments().exec();
+                const code = details.code || `POS-${String(count + 1).padStart(6, '0')}`;
+
+                let departmentId = details.departmentId || request.targetDepartmentId?.toString();
+
+                // Fallback to requester's department if none provided
+                if (!departmentId || departmentId === "" || departmentId === 'undefined') {
+                    const employee = await this.employeeProfileModel.findById(request.requestedByEmployeeId).exec();
+                    if (employee && employee.primaryDepartmentId) {
+                        departmentId = employee.primaryDepartmentId.toString();
+                    }
+                }
+
+                if (!departmentId || departmentId === "" || departmentId === 'undefined') {
+                    throw new BadRequestException('Department is required for a new position. Please specify a department.');
+                }
+
+                await this.createPosition({
+                    code,
+                    title: details.title || 'New Position',
+                    description: details.description || request.reason,
+                    departmentId,
+                    isActive: true,
+                } as any);
+                console.log(`[APPROVE] Created NEW_POSITION: ${code} in dept ${departmentId}`);
+
+            } else if (request.requestType === StructureRequestType.NEW_DEPARTMENT) {
+                const count = await this.departmentModel.countDocuments().exec();
+                const code = details.code || `DEPT-${String(count + 1).padStart(4, '0')}`;
+
+                await this.createDepartment({
+                    code,
+                    name: details.name || 'New Department',
+                    description: details.description || request.reason,
+                    isActive: true,
+                } as any);
+                console.log(`[APPROVE] Created NEW_DEPARTMENT: ${code}`);
+            }
+
+            // --- Update Request Status ---
+            request.status = StructureRequestStatus.APPROVED;
+            (request as any).approvedAt = new Date();
+            const updated = await request.save();
+
+            console.log(`[APPROVE] Successfully updated request ${id} to APPROVED and executed changes`);
 
             // Notify Requester
             if (updated.requestedByEmployeeId) {
@@ -143,7 +197,7 @@ export class OrganizationStructureService {
                     recipientId: updated.requestedByEmployeeId.toString(),
                     type: NotificationType.REQUEST_APPROVED,
                     title: 'Structure Change Request Approved',
-                    message: `Your change request ${updated.requestNumber} has been APPROVED.`,
+                    message: `Your change request ${updated.requestNumber} has been APPROVED and implemented.`,
                     relatedEntityId: updated._id.toString(),
                     relatedEntityType: 'StructureChangeRequest',
                 });
@@ -189,55 +243,95 @@ export class OrganizationStructureService {
     }
 
     async getMyTeam(managerId: string): Promise<any[]> {
-        // 1. Find manager's current position assignment
-        const myAssignment = await this.positionAssignmentModel.findOne({
+        // 1. Find manager's all current position assignments
+        const myAssignments = await this.positionAssignmentModel.find({
             employeeProfileId: new Types.ObjectId(managerId),
             $or: [{ endDate: null }, { endDate: { $gt: new Date() } }]
         }).exec();
 
-        if (!myAssignment) {
-            console.log(`[MyTeam] No assignment found for manager ${managerId}`);
-            return []; // Not assigned to any position, so no team
-        }
-        console.log(`[MyTeam] Found assignment for manager ${managerId}: ${myAssignment.positionId}`);
-
-        // 2. Find all positions that report to this position
-        const directReportPositions = await this.positionModel.find({
-            reportsToPositionId: myAssignment.positionId
-        }).exec();
-
-        if (directReportPositions.length === 0) {
-            console.log(`[MyTeam] No direct reports found for position ${myAssignment.positionId}`);
+        if (myAssignments.length === 0) {
             return [];
         }
+
+        const myPositionIds = myAssignments.map(a => a.positionId);
+        const myPositionIdStrings = myPositionIds.map(id => id.toString());
+
+        console.log(`[MyTeam] Manager ${managerId} position IDs:`, myPositionIdStrings);
+
+        // 2. Find all positions that report to any of these positions
+        // We query using both ObjectId and String formats to handle data inconsistency
+        const directReportPositions = await this.positionModel.find({
+            $or: [
+                { reportsToPositionId: { $in: myPositionIds } },
+                { reportsToPositionId: { $in: myPositionIdStrings } }
+            ],
+            isActive: true,
+        }).exec();
+
         console.log(`[MyTeam] Found ${directReportPositions.length} direct report positions.`);
+        directReportPositions.forEach(p => console.log(` - Position: ${p.title} (${p._id}) reports to ${p.reportsToPositionId}`));
 
-        const positionIds = directReportPositions.map(p => p._id);
+        if (directReportPositions.length === 0) {
+            return [];
+        }
 
-        // 3. Find employees assigned to these positions
+        const directReportPositionIds = directReportPositions.map(p => p._id);
+        const directReportPositionIdStrings = directReportPositionIds.map(id => id.toString());
+
+        // 3. Find all active assignments for these reporting positions
         const teamAssignments = await this.positionAssignmentModel.find({
-            positionId: { $in: positionIds },
-            $or: [{ endDate: null }, { endDate: { $gt: new Date() } }]
+            positionId: { $in: directReportPositionIds },
+            $or: [{ endDate: null }, { endDate: { $gt: new Date() } }],
         })
-            .populate('employeeProfileId', 'firstName lastName workEmail jobTitle departmentId')
-            .populate('positionId', 'title code')
+            .populate('employeeProfileId', 'firstName lastName workEmail profilePictureUrl')
+            .populate('positionId', 'title')
             .populate('departmentId', 'name')
             .exec();
 
-        // 4. Transform to friendly format
-        return teamAssignments.map(assignment => {
+        // 4. Transform to friendly format and deduplicate
+        const teamMap = new Map<string, any>();
+
+        teamAssignments.forEach(assignment => {
             const emp = assignment.employeeProfileId as any;
+            if (!emp) return;
+
+            const empId = emp._id.toString();
+
+            // EXCLUDE the manager from their own team
+            if (empId === managerId) return;
+
             const pos = assignment.positionId as any;
             const dept = assignment.departmentId as any;
-            return {
-                id: emp._id,
-                name: `${emp.firstName} ${emp.lastName}`,
-                email: emp.workEmail,
-                position: pos.title,
-                department: dept.name,
-                assignmentDate: assignment.startDate,
-            };
+
+            // If already present, don't overwrite (we could add logic to pick the "best" position)
+            // But let's check if this position actually reports to the manager (redundant but safe)
+            if (!teamMap.has(empId)) {
+                teamMap.set(empId, {
+                    id: empId,
+                    name: `${emp.firstName} ${emp.lastName}`,
+                    email: emp.workEmail,
+                    position: pos?.title || 'Unknown Position',
+                    department: dept?.name || 'Unknown Department',
+                    profilePictureUrl: emp.profilePictureUrl,
+                    assignmentDate: assignment.startDate,
+                });
+            } else {
+                // If we already have this person, maybe we should prefer a more "meaningful" title?
+                // For example, if we currently have "try" but this assignment is "Test Developer",
+                // and Fatima wants to see "Test Developer".
+                // Simple heuristic: if the current title is "try", replace it.
+                const current = teamMap.get(empId);
+                if (current.position === 'try' && pos?.title !== 'try') {
+                    current.position = pos.title;
+                }
+            }
         });
+
+        const finalTeam = Array.from(teamMap.values());
+        console.log(`[MyTeam] Final team size for ${managerId}: ${finalTeam.length}`);
+        finalTeam.forEach(m => console.log(` - Member: ${m.name} (${m.position})`));
+
+        return finalTeam;
     }
 
     // --- Department ---

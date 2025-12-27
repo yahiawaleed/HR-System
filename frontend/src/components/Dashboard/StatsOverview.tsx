@@ -62,7 +62,7 @@ export default function StatsOverview() {
     // Fetch Total Employees
     const { data: employeesData } = useQuery({
         queryKey: ['stats-employees'],
-        queryFn: () => employeeService.getAll(1, 1), // Minimal fetch just for total
+        queryFn: () => employeeService.getAll(1, 1, undefined, 'ACTIVE'), // Fetch only active
     });
 
     // Fetch Pending Requests

@@ -31,4 +31,10 @@ export class UpdateContactInfoDto {
     @IsString()
     @MaxLength(500)
     address?: string;
+
+    @ApiPropertyOptional({ example: 'Experienced software engineer...', description: 'Short biography' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(1000)
+    biography?: string;
 }

@@ -337,7 +337,14 @@ export class EmployeeProfileService {
       updateData.personalEmail = updateDto.personalEmail;
     }
     if (updateDto.address !== undefined) {
-      updateData.address = updateDto.address;
+      if (typeof updateDto.address === 'string') {
+        updateData.address = { streetAddress: updateDto.address };
+      } else {
+        updateData.address = updateDto.address;
+      }
+    }
+    if (updateDto.biography !== undefined) {
+      updateData.biography = updateDto.biography;
     }
 
     const updatedEmployee = await this.employeeProfileModel
@@ -872,6 +879,10 @@ export class EmployeeProfileService {
         { employeeNumber: { $regex: queryDto.search, $options: 'i' } },
         { workEmail: { $regex: queryDto.search, $options: 'i' } },
       ];
+    }
+
+    if (queryDto.status) {
+      filter.status = queryDto.status;
     }
 
     const [data, total] = await Promise.all([

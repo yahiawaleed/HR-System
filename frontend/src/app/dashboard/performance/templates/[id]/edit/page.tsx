@@ -32,9 +32,9 @@ export default function EditTemplatePage() {
     const [formData, setFormData] = useState<CreateTemplateData>({
         name: '',
         description: '',
-        templateType: 'STANDARD',
+        templateType: 'ANNUAL',
         ratingScale: {
-            type: 'NUMERIC',
+            type: 'FIVE_POINT',
             min: 1,
             max: 5,
             labels: [],
@@ -52,9 +52,9 @@ export default function EditTemplatePage() {
             setFormData({
                 name: template.name,
                 description: template.description || '',
-                templateType: 'STANDARD',
-                ratingScale: {
-                    type: 'NUMERIC',
+                templateType: (template as any).templateType || 'ANNUAL',
+                ratingScale: (template as any).ratingScale || {
+                    type: 'FIVE_POINT',
                     min: 1,
                     max: 5,
                     labels: [],
@@ -64,7 +64,8 @@ export default function EditTemplatePage() {
                     description: s.description || '',
                     weight: s.weight,
                     criteria: s.criteria.map((c: any) => ({
-                        name: c.name,
+                        key: c.key || c.name?.toLowerCase().replace(/\s+/g, '_') || '',
+                        title: c.title || c.name || '',
                         description: c.description || '',
                         weight: c.weight,
                         type: c.type,
@@ -118,7 +119,8 @@ export default function EditTemplatePage() {
     const addCriteria = (sectionIndex: number) => {
         const newSections = [...formData.sections];
         newSections[sectionIndex].criteria.push({
-            name: '',
+            key: '',
+            title: '',
             description: '',
             weight: 0,
             type: 'RATING',
@@ -199,7 +201,7 @@ export default function EditTemplatePage() {
                         Basic Information
                     </Typography>
                     <Grid container spacing={3}>
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        <Grid size={{ xs: 12, md: 4 }}>
                             <TextField
                                 fullWidth
                                 required
@@ -209,7 +211,41 @@ export default function EditTemplatePage() {
                                 onChange={handleBasicChange}
                             />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                            <FormControl fullWidth>
+                                <InputLabel>Template Type</InputLabel>
+                                <Select
+                                    name="templateType"
+                                    value={formData.templateType}
+                                    label="Template Type"
+                                    onChange={(e) => setFormData({ ...formData, templateType: e.target.value })}
+                                >
+                                    <MenuItem value="ANNUAL">Annual</MenuItem>
+                                    <MenuItem value="SEMI_ANNUAL">Semi-Annual</MenuItem>
+                                    <MenuItem value="PROBATIONARY">Probationary</MenuItem>
+                                    <MenuItem value="PROJECT">Project</MenuItem>
+                                    <MenuItem value="AD_HOC">Ad-Hoc</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                            <FormControl fullWidth>
+                                <InputLabel>Rating Scale Type</InputLabel>
+                                <Select
+                                    value={formData.ratingScale.type}
+                                    label="Rating Scale Type"
+                                    onChange={(e) => setFormData({
+                                        ...formData,
+                                        ratingScale: { ...formData.ratingScale, type: e.target.value }
+                                    })}
+                                >
+                                    <MenuItem value="THREE_POINT">Three Point</MenuItem>
+                                    <MenuItem value="FIVE_POINT">Five Point</MenuItem>
+                                    <MenuItem value="TEN_POINT">Ten Point</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
                             <TextField
                                 fullWidth
                                 label="Description"
@@ -286,14 +322,24 @@ export default function EditTemplatePage() {
                                 <Box>
                                     {section.criteria.map((criteria, cIndex) => (
                                         <Grid container spacing={2} key={cIndex} alignItems="center" mb={1}>
-                                            <Grid size={{ xs: 12, md: 4 }}>
+                                            <Grid size={{ xs: 12, md: 2 }}>
                                                 <TextField
                                                     fullWidth
                                                     size="small"
                                                     required
-                                                    label="Criteria Name"
-                                                    value={criteria.name}
-                                                    onChange={(e) => handleCriteriaChange(sIndex, cIndex, 'name', e.target.value)}
+                                                    label="Key (e.g., job_knowledge)"
+                                                    value={criteria.key}
+                                                    onChange={(e) => handleCriteriaChange(sIndex, cIndex, 'key', e.target.value)}
+                                                />
+                                            </Grid>
+                                            <Grid size={{ xs: 12, md: 3 }}>
+                                                <TextField
+                                                    fullWidth
+                                                    size="small"
+                                                    required
+                                                    label="Title"
+                                                    value={criteria.title}
+                                                    onChange={(e) => handleCriteriaChange(sIndex, cIndex, 'title', e.target.value)}
                                                 />
                                             </Grid>
                                             <Grid size={{ xs: 12, md: 3 }}>

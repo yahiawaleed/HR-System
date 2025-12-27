@@ -44,6 +44,14 @@ export class PaginationQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({
+    example: 'ACTIVE',
+    description: 'Filter by status',
+  })
+  @IsOptional()
+  @IsString()
+  status?: string;
 }
 
 export class EmployeeProfileResponseDto {
