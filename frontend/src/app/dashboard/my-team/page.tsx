@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/services/api';
 import {
     Box,
     Typography,
@@ -30,6 +31,7 @@ interface TeamMember {
     email: string;
     position: string;
     department: string;
+    profilePictureUrl?: string;
     assignmentDate: string;
 }
 
@@ -143,6 +145,7 @@ export default function MyTeamPage() {
                             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: '0.3s', '&:hover': { boxShadow: 6 } }}>
                                 <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
                                     <Avatar
+                                        src={member.profilePictureUrl ? `${API_BASE_URL}/api/employee-profile${member.profilePictureUrl}` : undefined}
                                         sx={{
                                             width: 80,
                                             height: 80,

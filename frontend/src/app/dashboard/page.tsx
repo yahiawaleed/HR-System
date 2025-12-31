@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Typography, Box, Grid, Card, CardContent, Avatar, Paper, List, ListItem, ListItemText, ListItemAvatar, Divider, Chip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { People, Assignment, Assessment, PersonSearch, TrendingUp, Groups, Business, Work, Notifications, Schedule, Payments } from '@mui/icons-material';
+import { People, Assignment, Assessment, PersonSearch, TrendingUp, Groups, Business, Work, Notifications, Schedule, Payments, ReceiptLong, RequestQuote, ReportProblem } from '@mui/icons-material';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { notificationsService } from '@/services/notificationsService';
@@ -111,7 +111,15 @@ export default function DashboardPage() {
             icon: <Payments />,
             href: '/dashboard/payroll',
             color: '#14B8A6', // Teal
-            visible: isSystemAdmin || isPayrollManager || isHRManager,
+            visible: isSystemAdmin || isPayrollManager || isHRManager || isPayrollSpecialist, // Added Payroll Specialist
+        },
+        {
+            title: 'Payroll Tracking',
+            description: 'View payslips, claims, and disputes',
+            icon: <ReceiptLong />,
+            href: '/dashboard/payroll/tracking',
+            color: '#059669', // Green
+            visible: true,
         },
     ];
 
@@ -171,6 +179,7 @@ export default function DashboardPage() {
                                             href={card.href}
                                             sx={{
                                                 height: '100%',
+                                                minHeight: 200, // Add this to enforce minimum height
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 textDecoration: 'none',

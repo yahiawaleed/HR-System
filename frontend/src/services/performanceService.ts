@@ -20,7 +20,8 @@ export interface TemplateSection {
 }
 
 export interface SectionCriteria {
-    name: string;
+    key: string;
+    title: string;
     description?: string;
     weight: number; // 0-100
     type: 'RATING' | 'TEXT' | 'BOOLEAN';

@@ -294,10 +294,8 @@ export default function EditEmployeePage() {
                                 value={formData.contractType}
                                 onChange={handleChange}
                             >
-                                <MenuItem value="FULL_TIME">Full Time</MenuItem>
-                                <MenuItem value="PART_TIME">Part Time</MenuItem>
-                                <MenuItem value="CONTRACT">Contract</MenuItem>
-                                <MenuItem value="TEMPORARY">Temporary</MenuItem>
+                                <MenuItem value="FULL_TIME_CONTRACT">Full Time Contract</MenuItem>
+                                <MenuItem value="PART_TIME_CONTRACT">Part Time Contract</MenuItem>
                             </TextField>
                         </Grid>
 

@@ -10,11 +10,16 @@ import {
     CardGiftcard,
     Policy,
     HealthAndSafety,
-    Money
+    Money,
+    PlayArrow
 } from '@mui/icons-material';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PayrollConfigurationPage() {
+    const { user } = useAuth();
+    const isPayrollSpecialist = user?.role === 'Payroll Specialist';
+
     const configModules = [
         {
             title: 'Company Settings',
@@ -80,6 +85,17 @@ export default function PayrollConfigurationPage() {
             color: '#14B8A6', // Teal
         },
     ];
+
+    // Add "Run Payroll" module only for Payroll Specialists
+    if (isPayrollSpecialist) {
+        configModules.unshift({
+            title: 'Run Payroll',
+            description: 'Initiate payroll cycles and generate payslips',
+            icon: <PlayArrow />,
+            href: '/dashboard/payroll/run-payroll',
+            color: '#7C3AED', // Violet
+        });
+    }
 
     return (
         <Box>

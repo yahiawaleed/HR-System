@@ -53,6 +53,7 @@ export default function ProfilePage() {
         homePhone: '',
         personalEmail: '',
         address: '',
+        biography: '',
     });
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
@@ -103,7 +104,11 @@ export default function ProfilePage() {
             mobilePhone: profile?.mobilePhone || '',
             homePhone: profile?.homePhone || '',
             personalEmail: profile?.personalEmail || '',
-            address: '', // Address would need to be added to the interface
+            // Handle address whether it's a string or object
+            address: typeof profile?.address === 'string'
+                ? profile.address
+                : (profile?.address as any)?.streetAddress || '',
+            biography: profile?.biography || '',
         });
         setContactEditDialog(true);
     };
@@ -155,7 +160,7 @@ export default function ProfilePage() {
     );
 
     const profilePictureUrl = profile?.profilePictureUrl
-        ? `${API_BASE_URL}${profile.profilePictureUrl}`
+        ? `${API_BASE_URL}/api/employee-profile${profile.profilePictureUrl}`
         : undefined;
 
     return (
@@ -216,6 +221,11 @@ export default function ProfilePage() {
                             size="small"
                             sx={{ mt: 1 }}
                         />
+                        {profile?.biography && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
+                                "{profile.biography}"
+                            </Typography>
+                        )}
                     </Paper>
                 </Grid>
 
@@ -310,7 +320,7 @@ export default function ProfilePage() {
                     <Paper sx={{ p: 3 }}>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                             <Typography variant="h6">
-                                Contact Information
+                                Contact & Bio
                             </Typography>
                             <Button
                                 size="small"
@@ -399,6 +409,16 @@ export default function ProfilePage() {
                         value={contactData.address}
                         onChange={(e) => setContactData({ ...contactData, address: e.target.value })}
                         placeholder="123 Main Street, Cairo, Egypt"
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Biography"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={contactData.biography}
+                        onChange={(e) => setContactData({ ...contactData, biography: e.target.value })}
+                        placeholder="Tell us a bit about yourself..."
                     />
                 </DialogContent>
                 <DialogActions>

@@ -184,6 +184,19 @@ export class EmployeeProfileController {
     return this.employeeProfileService.uploadProfilePicture(id, file);
   }
 
+  @Get('uploads/profile-pictures/:filename')
+  async getProfilePicture(@Param('filename') filename: string, @Res() res: Response) {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'uploads/profile-pictures', filename);
+
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).send('File not found');
+    }
+  }
+
   @Get(':id/qualifications')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(...ALL_EMPLOYEE_ROLES)
@@ -257,6 +270,13 @@ export class EmployeeProfileController {
   @Roles('HR Admin', 'HR Manager')
   async deactivateEmployee(@Param('id') id: string, @Body() body: { status: string }) {
     return this.employeeProfileService.deactivateEmployee(id, body.status as any);
+  }
+
+  @Delete(':id/permanent')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('HR Admin', 'HR Manager', 'System Admin')
+  async permanentDeleteEmployee(@Param('id') id: string) {
+    return this.employeeProfileService.delete(id);
   }
 
   @Get(':id')

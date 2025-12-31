@@ -50,9 +50,10 @@ export interface CreateEmployeeData {
 
 export const employeeService = {
     // Get all employees with pagination
-    getAll: async (page = 1, limit = 10, search?: string) => {
+    getAll: async (page = 1, limit = 10, search?: string, status?: string) => {
         const params = new URLSearchParams({ page: String(page), limit: String(limit) });
         if (search) params.append('search', search);
+        if (status) params.append('status', status);
         const response = await api.get(`/api/employee-profile?${params}`);
         return response.data;
     },
@@ -80,6 +81,12 @@ export const employeeService = {
         const response = await api.delete(`/api/employee-profile/${id}`, {
             data: { status },
         });
+        return response.data;
+    },
+
+    // Permanent delete
+    deletePermanently: async (id: string): Promise<{ message: string }> => {
+        const response = await api.delete(`/api/employee-profile/${id}/permanent`);
         return response.data;
     },
 
@@ -115,6 +122,7 @@ export const employeeService = {
         homePhone?: string;
         personalEmail?: string;
         address?: string;
+        biography?: string;
     }): Promise<EmployeeProfile> => {
         const response = await api.patch(`/api/employee-profile/${id}/contact`, data);
         return response.data;

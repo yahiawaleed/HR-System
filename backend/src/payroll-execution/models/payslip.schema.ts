@@ -55,7 +55,7 @@ const DeductionsSchema = SchemaFactory.createForClass(Deductions)
 export class paySlip {
     @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: Employee.name })
     employeeId: mongoose.Types.ObjectId;
-    @Prop({ type: mongoose.Schema.ObjectId, ref: payrollRuns.name, required: true })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: payrollRuns.name, required: true })
     payrollRunId: mongoose.Types.ObjectId;
     @Prop({ type: EarningsSchema })
     earningsDetails: Earnings;
@@ -64,7 +64,7 @@ export class paySlip {
     @Prop({ required: true })
     totalGrossSalary: number
     @Prop({ required: true })
-    totaDeductions?: number
+    totalDeductions?: number
     @Prop({ required: true })
     netPay: number
     @Prop({ type: String, enum: PaySlipPaymentStatus, default: PaySlipPaymentStatus.PENDING })

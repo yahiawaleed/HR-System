@@ -46,7 +46,7 @@ async function resolveDepartmentHead(
     return undefined;
   }
 
-  if (positionId && department.headPositionId.equals(positionId)) {
+  if (positionId && String(department.headPositionId) === String(positionId)) {
     return undefined;
   }
 
@@ -66,13 +66,15 @@ function isObjectIdLike(value: unknown): value is Types.ObjectId | string {
 PositionSchema.pre('save', async function (next) {
   try {
     const doc = this as HydratedDocument<Position>;
-    // Use the connection from the document to get the model
-    const DepartmentModel = doc.db.model<DepartmentDocument>(Department.name);
-    doc.reportsToPositionId = await resolveDepartmentHead(
-      DepartmentModel,
-      doc.departmentId,
-      doc._id,
-    );
+    // Only auto-resolve if NOT provided
+    if (!doc.reportsToPositionId) {
+      const DepartmentModel = doc.db.model<DepartmentDocument>(Department.name);
+      doc.reportsToPositionId = await resolveDepartmentHead(
+        DepartmentModel,
+        doc.departmentId,
+        doc._id,
+      );
+    }
     next();
   } catch (error) {
     next(error as Error);
@@ -124,12 +126,17 @@ PositionSchema.pre('findOneAndUpdate', async function (next) {
       (this.getQuery()._id as Types.ObjectId) || undefined,
     );
 
-    if (update.$set) {
-      update.$set.reportsToPositionId = headId;
-    } else {
-      update.$set = {
-        reportsToPositionId: headId,
-      } as UpdateQuery<Position>['$set'];
+    // Only override if NOT explicitly provided in the update
+    const manualReportsTo = update.reportsToPositionId || (update.$set && update.$set.reportsToPositionId);
+
+    if (!manualReportsTo) {
+      if (update.$set) {
+        update.$set.reportsToPositionId = headId;
+      } else {
+        update.$set = {
+          reportsToPositionId: headId,
+        } as UpdateQuery<Position>['$set'];
+      }
     }
 
     this.setUpdate(update);

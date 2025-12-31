@@ -48,11 +48,19 @@ interface Position {
     reportsTo?: string;
 }
 
+interface Position {
+    _id: string;
+    title: string;
+    level: number;
+    isActive: boolean;
+    reportsTo?: string;
+}
+
 interface Department {
     _id: string;
     name: string;
     code: string;
-    status: string;
+    isActive: boolean;
     headOfDepartment?: {
         fullName: string;
         employeeNumber: string;
@@ -165,10 +173,10 @@ export default function HierarchyPage() {
                         <>
                             <Box sx={{ mb: 2, p: 2, bgcolor: 'info.light', borderRadius: 1 }}>
                                 <Typography variant="body2">
-                                    Showing {employees.length} employees in organizational chart
+                                    Showing {employees.filter((emp: any) => emp.status === 'ACTIVE').length} employees in organizational chart
                                 </Typography>
                             </Box>
-                            <OrgChart employees={employees.map((emp: any) => {
+                            <OrgChart employees={employees.filter((emp: any) => emp.status === 'ACTIVE').map((emp: any) => {
                                 // Find the system role for this employee
                                 const empRole = systemRoles?.find(
                                     (role: SystemRole) => role.employeeProfile._id === emp._id ||
@@ -205,7 +213,7 @@ export default function HierarchyPage() {
                                             <Business color="primary" />
                                             <Box>
                                                 <Typography variant="h4">
-                                                    {departments?.filter(d => d.status === 'ACTIVE').length || 0}
+                                                    {departments?.filter(d => d.isActive).length || 0}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
                                                     Active Departments
@@ -238,8 +246,8 @@ export default function HierarchyPage() {
                                                 </Typography>
                                             </Box>
                                             <Chip
-                                                label={dept.status}
-                                                color={dept.status === 'ACTIVE' ? 'success' : 'default'}
+                                                label={dept.isActive ? 'ACTIVE' : 'INACTIVE'}
+                                                color={dept.isActive ? 'success' : 'default'}
                                                 size="small"
                                             />
                                             {dept.headOfDepartment && (
@@ -380,8 +388,8 @@ function DepartmentPositions({ departmentId }: { departmentId: string }) {
                                 </Typography>
                             </Box>
                             <Chip
-                                label={position.status}
-                                color={position.status === 'ACTIVE' ? 'success' : 'default'}
+                                label={position.isActive ? 'ACTIVE' : 'INACTIVE'}
+                                color={position.isActive ? 'success' : 'default'}
                                 size="small"
                             />
                         </Box>
