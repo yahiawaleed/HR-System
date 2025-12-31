@@ -43,19 +43,20 @@ export default function DisputesPage() {
   });
 
   useEffect(() => {
-    if (user?.employeeId) {
+    if (user?.userId) {
       fetchDisputes();
       fetchPayslips();
-    } else if (user && !user.employeeId) {
-        setLoading(false);
+    } else if (user && !user.userId) {
+      setLoading(false);
     }
   }, [user]);
 
   const fetchDisputes = async () => {
+    if (!user?.userId) return;
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get(`/payroll-tracking/disputes?employeeId=${user.employeeId}`);
+      const response = await api.get(`/payroll-tracking/disputes?employeeId=${user.userId}`);
       setDisputes(response.data);
     } catch (error) {
       console.error('Error fetching disputes:', error);
@@ -66,8 +67,9 @@ export default function DisputesPage() {
   };
 
   const fetchPayslips = async () => {
+    if (!user?.userId) return;
     try {
-      const response = await api.get(`/payroll-tracking/payslips/employee/${user.employeeId}`);
+      const response = await api.get(`/payroll-tracking/payslips/employee/${user.userId}`);
       setPayslips(response.data);
     } catch (error) {
       console.error('Error fetching payslips:', error);
@@ -87,12 +89,11 @@ export default function DisputesPage() {
         return;
     }
 
-    // Fallback to user.userId if employeeId is not available
-    const employeeId = user?.employeeId || user?.userId;
-
+    // Use userId from user object
+    const employeeId = user?.userId;
     if (!employeeId) {
-        setError("Could not identify the current user. Please re-login.");
-        return;
+      setError("Could not identify the current user. Please re-login.");
+      return;
     }
 
     try {

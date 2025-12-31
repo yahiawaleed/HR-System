@@ -10,17 +10,18 @@ export default function MyPayslipsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user?.employeeId) {
+    if (user?.userId) {
       fetchPayslips();
-    } else if (user && !user.employeeId) {
-        // If user is loaded but has no employeeId (e.g. admin without profile), stop loading
-        setLoading(false);
+    } else if (user && !user.userId) {
+      // If user is loaded but has no userId (e.g. admin without profile), stop loading
+      setLoading(false);
     }
   }, [user]);
 
   const fetchPayslips = async () => {
+    if (!user?.userId) return;
     try {
-      const response = await api.get(`/payroll-tracking/payslips/employee/${user.employeeId}`);
+      const response = await api.get(`/payroll-tracking/payslips/employee/${user.userId}`);
       setPayslips(response.data);
     } catch (error) {
       console.error('Error fetching payslips:', error);

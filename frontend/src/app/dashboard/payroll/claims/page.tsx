@@ -43,12 +43,12 @@ export default function ClaimsPage() {
   });
 
   useEffect(() => {
-    // Use employeeId if available, otherwise fallback to userId
-    const idToUse = user?.employeeId || user?.userId;
+    // Use userId from user object
+    const idToUse = user?.userId;
     if (idToUse) {
       fetchClaims(idToUse);
     } else if (user && !idToUse) {
-        setLoading(false);
+      setLoading(false);
     }
   }, [user]);
 
@@ -80,12 +80,11 @@ export default function ClaimsPage() {
         return;
     }
 
-    // Fallback to user.userId if employeeId is not available
-    const employeeId = user?.employeeId || user?.userId;
 
+    const employeeId = user?.userId;
     if (!employeeId) {
-        setError("Could not identify the current user. Please re-login.");
-        return;
+      setError("Could not identify the current user. Please re-login.");
+      return;
     }
 
     try {
@@ -130,7 +129,7 @@ export default function ClaimsPage() {
         </Box>
         <Button
           startIcon={<RefreshIcon />}
-          onClick={() => fetchClaims(user?.employeeId || user?.userId || '')}
+          onClick={() => fetchClaims(user?.userId || '')}
           disabled={loading}
           variant="outlined"
           sx={{ borderRadius: 2 }}
